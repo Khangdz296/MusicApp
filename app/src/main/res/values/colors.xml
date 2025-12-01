@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="color_bg">#050505</color>             <!-- nền toàn app -->
+    <color name="color_surface">#121212</color>        <!-- card, toolbar -->
+    <color name="color_primary">#1DB954</color>        <!-- xanh lá chính -->
+    <color name="color_primary_variant">#1ED760</color>
+    <color name="color_text_primary">#FFFFFF</color>
+    <color name="color_text_secondary">#B3B3B3</color>
+    <color name="color_divider">#222222</color>
+</resources>
