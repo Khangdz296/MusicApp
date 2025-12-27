@@ -30,13 +30,13 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@android:drawable/ic_menu_search"
-                    app:tint="@color/white"/>
+                    app:tint="@color/spotify_black"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Find in playlist"
-                    android:textColor="@color/white"
+                    android:textColor="@color/spotify_black"
                     android:layout_marginStart="10dp"/>
             </LinearLayout>
 
