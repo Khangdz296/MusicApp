@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else if (id == R.id.nav_library) {
                     // Tương tự, tạm thời load Home
-                    selectedFragment = new HomeFragment();
+                    selectedFragment = new LibraryFragment();
                     // selectedFragment = new LibraryFragment();
                 }
                 else if (id == R.id.nav_profile) {
