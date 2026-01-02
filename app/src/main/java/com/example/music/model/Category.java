@@ -1,4 +1,4 @@
-package com.example.music;
+package com.example.music.model;
 
 public class Category {
     private String name;
