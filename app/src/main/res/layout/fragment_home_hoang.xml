@@ -58,7 +58,7 @@
             android:orientation="horizontal"
             android:layout_marginStart="12dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:listitem="@layout/item_square_hoang"/>
+            tools:listitem="@layout/item_banner_hoang"/>
 
         <TextView
             android:text="Mới phát hành"
@@ -74,7 +74,20 @@
             tools:listitem="@layout/item_square_hoang"/>
 
         <TextView
-            android:text="Categories"
+            android:text="Nghệ sĩ yêu thích"
+            style="@style/SpotifyTitle"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvArtists"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginStart="12dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/item_artist_hoang"/>
+
+        <TextView
+            android:text="Thể loại"
             style="@style/SpotifyTitle"/>
 
         <androidx.recyclerview.widget.RecyclerView
@@ -98,7 +111,6 @@
             android:layout_marginStart="12dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             tools:listitem="@layout/item_square_hoang"/>
-
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>
