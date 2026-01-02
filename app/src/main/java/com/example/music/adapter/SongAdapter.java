@@ -1,4 +1,4 @@
-package com.example.music;
+package com.example.music.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +8,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide; // Import thư viện Glide
+import com.example.music.R;
+import com.example.music.model.Song;
+
 import java.util.List;
 
 public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder> {
