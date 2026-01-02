@@ -24,7 +24,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:color/transparent"
-        tools:context=".RegisterActivity">
+        tools:context=".RegisterActivity"
+        tools:ignore="ExtraText">
 
         <TextView
             android:id="@+id/txtTitle"
@@ -36,7 +37,8 @@
             android:textSize="34sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
-            tools:layout_editor_absoluteY="260dp" />
+            tools:layout_editor_absoluteY="260dp"
+            tools:ignore="MissingConstraints" />
 
         <EditText
             android:id="@+id/edtName"
