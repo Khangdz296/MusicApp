@@ -13,110 +13,104 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.example.music.R;
+// Import đúng Adapter và Model
+import com.example.music.adapter.ArtistAdapter;
+import com.example.music.adapter.CategoryAdapter;
+import com.example.music.adapter.SongAdapter;
+import com.example.music.model.Artist;
+import com.example.music.model.Category;
+import com.example.music.model.Song;
 
 public class HomeFragment extends Fragment {
 
-    // Khai báo các biến RecyclerView tương ứng với 6 mục trong giao diện
     private RecyclerView rvBanner, rvNewReleases, rvCharts, rvRecentlyPlayed, rvArtists, rvCategories;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // 1. KẾT NỐI VỚI FILE GIAO DIỆN XML CỦA BẠN
         View view = inflater.inflate(R.layout.fragment_home_hoang, container, false);
 
-        // 2. ÁNH XẠ VIEW (Tìm các RecyclerView trong file XML bằng ID)
-        rvRecentlyPlayed = view.findViewById(R.id.rvRecentlyPlayed); // Nghe gần đây
-        rvBanner = view.findViewById(R.id.rvHighlight);            // Banner (Highlight)
-        rvNewReleases = view.findViewById(R.id.rvNewReleases);     // Nhạc mới
-        rvCharts = view.findViewById(R.id.rvCharts);               // Bảng xếp hạng
-        rvArtists = view.findViewById(R.id.rvArtists);             // Nghệ sĩ
-        rvCategories = view.findViewById(R.id.rvCategories);       // Thể loại
+        // Ánh xạ View
+        rvRecentlyPlayed = view.findViewById(R.id.rvRecentlyPlayed);
+        rvBanner = view.findViewById(R.id.rvHighlight);
+        rvNewReleases = view.findViewById(R.id.rvNewReleases);
+        rvCharts = view.findViewById(R.id.rvCharts);
+        rvArtists = view.findViewById(R.id.rvArtists);
+        rvCategories = view.findViewById(R.id.rvCategories);
 
-        // 3. KHỞI TẠO DỮ LIỆU & ADAPTER CHO TỪNG MỤC
-
-        // --- MỤC 1: NGHE GẦN ĐÂY (Dùng Type RECENT - Hình tròn/nhỏ) ---
+        // --- SETUP CÁC MỤC SONG ---
         setupSection(rvRecentlyPlayed, getMockSongs("Sơn Tùng M-TP", "Lạc Trôi"), SongAdapter.TYPE_RECENT);
-
-        // --- MỤC 2: BANNER (Dùng Type BANNER - Hình chữ nhật to) ---
         setupSection(rvBanner, getMockSongs("Top Hits", "Banner Hot"), SongAdapter.TYPE_BANNER);
-
-        // --- MỤC 3: NHẠC MỚI (Dùng Type STANDARD - Hình vuông chuẩn) ---
         setupSection(rvNewReleases, getMockSongs("MONO", "Waiting For You"), SongAdapter.TYPE_STANDARD);
-
-        // --- MỤC 4: BẢNG XẾP HẠNG (Dùng Type STANDARD) ---
         setupSection(rvCharts, getMockSongs("Global", "Top 50"), SongAdapter.TYPE_STANDARD);
 
-        // --- MỤC 5: NGHỆ SĨ (Dùng ArtistAdapter riêng) ---
+        // --- SETUP NGHỆ SĨ & THỂ LOẠI (Đã sửa lại cho khớp Model mới) ---
         setupArtists();
-
-        // --- MỤC 6: THỂ LOẠI (Dùng CategoryAdapter riêng) ---
         setupCategories();
 
         return view;
     }
 
-
-    /**
-     * Hàm dùng chung để setup cho các list bài hát (Banner, Nhạc mới, BXH...)
-     */
+    // Hàm setup cho danh sách bài hát (Giữ nguyên)
     private void setupSection(RecyclerView rv, List<Song> data, int type) {
-        // Tạo Adapter với dữ liệu và kiểu hiển thị (Type)
+        // Lưu ý: Nếu SongAdapter của bạn cũng cần Context, hãy thêm getContext() vào đây
         SongAdapter adapter = new SongAdapter(data, type);
-
-        // Setup LayoutManager: Hiển thị danh sách nằm ngang (Horizontal)
         rv.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-
-        // Gán Adapter vào RecyclerView
         rv.setAdapter(adapter);
     }
 
-    /**
-     * Hàm setup riêng cho mục Nghệ sĩ
-     */
+    // --- SỬA HÀM SETUP ARTIST (Quan trọng) ---
     private void setupArtists() {
         List<Artist> artists = new ArrayList<>();
-        // Tạo dữ liệu giả Artist (Ảnh dùng tạm ic_launcher_background hoặc ảnh có sẵn trong drawable)
-        artists.add(new Artist("Sơn Tùng", R.drawable.ic_launcher_background));
-        artists.add(new Artist("JustaTee", R.drawable.ic_launcher_background));
-        artists.add(new Artist("Đen Vâu", R.drawable.ic_launcher_background));
-        artists.add(new Artist("HIEUTHUHAI", R.drawable.ic_launcher_background));
 
-        ArtistAdapter adapter = new ArtistAdapter(artists);
+        // Sửa: Dùng Constructor mới (id, name, imageUrl)
+        artists.add(new Artist("1", "Sơn Tùng", "https://picsum.photos/200/200?random=10"));
+        artists.add(new Artist("2", "JustaTee", "https://picsum.photos/200/200?random=11"));
+        artists.add(new Artist("3", "Đen Vâu", "https://picsum.photos/200/200?random=12"));
+        artists.add(new Artist("4", "HIEUTHUHAI", "https://picsum.photos/200/200?random=13"));
+
+        // Sửa: Truyền đủ 3 tham số (Context, List, Listener)
+        ArtistAdapter adapter = new ArtistAdapter(getContext(), artists, artist -> {
+            // Xử lý khi click vào ca sĩ (để trống tạm)
+        });
+
         rvArtists.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         rvArtists.setAdapter(adapter);
     }
 
-    /**
-     * Hàm setup riêng cho mục Thể loại
-     */
+    // --- SỬA HÀM SETUP CATEGORY (Quan trọng) ---
     private void setupCategories() {
         List<Category> categories = new ArrayList<>();
-        // Tạo dữ liệu giả Category
-        categories.add(new Category("V-Pop", R.drawable.ic_launcher_background));
-        categories.add(new Category("K-Pop", R.drawable.ic_launcher_background));
-        categories.add(new Category("US-UK", R.drawable.ic_launcher_background));
-        categories.add(new Category("Indie", R.drawable.ic_launcher_background));
 
-        CategoryAdapter adapter = new CategoryAdapter(categories);
+        // Sửa: Dùng Constructor mới (id, name, imageUrl)
+        categories.add(new Category("1", "V-Pop", "https://picsum.photos/200/200?random=20"));
+        categories.add(new Category("2", "K-Pop", "https://picsum.photos/200/200?random=21"));
+        categories.add(new Category("3", "US-UK", "https://picsum.photos/200/200?random=22"));
+        categories.add(new Category("4", "Indie", "https://picsum.photos/200/200?random=23"));
+
+        // Sửa: Truyền đủ 3 tham số (Context, List, Listener)
+        CategoryAdapter adapter = new CategoryAdapter(getContext(), categories, category -> {
+            // Xử lý khi click vào thể loại (để trống tạm)
+        });
+
         rvCategories.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         rvCategories.setAdapter(adapter);
     }
 
+    // Hàm tạo dữ liệu giả cho Song (Đã chuẩn với Model Song)
     private List<Song> getMockSongs(String artistName, String titlePrefix) {
         List<Song> list = new ArrayList<>();
-
         String demoUrl = "https://picsum.photos/600/600";
 
         for (int i = 1; i <= 6; i++) {
             list.add(new Song(
                     "id_" + i,              // ID
-                    titlePrefix + " #" + i, // Tên bài hát
-                    artistName,             // Tên ca sĩ
-                    demoUrl,                // Link ảnh (String URL)
-                    "",                     // File nhạc (Để trống)
-                    300,                    // Thời lượng
-                    false                   // Yêu thích
+                    titlePrefix + " #" + i, // Title
+                    artistName,             // Artist
+                    demoUrl,                // Image URL
+                    "",                     // File URL
+                    300,                    // Duration
+                    false                   // Is Favorite
             ));
         }
         return list;

@@ -3,19 +3,24 @@ package com.example.music.model;
 import java.io.Serializable;
 
 public class Artist implements Serializable {
+    private String id;          // Thêm ID
     private String name;
-    private int imageResId; // Ảnh avatar tròn
+    private String imageUrl;    // Đổi từ int sang String để load ảnh mạng
 
-    public Artist(String name, int imageResId) {
+    // Constructor cập nhật
+    public Artist(String id, String name, String imageUrl) {
+        this.id = id;
         this.name = name;
-        this.imageResId = imageResId;
+        this.imageUrl = imageUrl;
     }
 
-    public String getName() {
-        return name;
-    }
+    // Getters & Setters
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
-    public int getImageResId() {
-        return imageResId;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 }

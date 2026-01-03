@@ -6,14 +6,25 @@
     android:layout_height="100dp"
     android:layout_marginEnd="16dp"
     app:cardCornerRadius="8dp"
-    app:cardBackgroundColor="#FF5722"> <TextView
-    android:id="@+id/tvTitle"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Hip-Hop"
-    android:textColor="@color/white"
-    android:textStyle="bold"
-    android:textSize="18sp"
-    android:layout_gravity="bottom|start"
-    android:layout_margin="12dp"/>
-</androidx.cardview.widget.CardView>
+    app:cardElevation="4dp"
+    app:cardBackgroundColor="#FF5722"> <ImageView
+    android:id="@+id/imgBackground"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:scaleType="centerCrop"
+    android:src="@drawable/ic_launcher_background" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#33000000"/>
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hip-Hop"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:layout_gravity="center"/> </androidx.cardview.widget.CardView>

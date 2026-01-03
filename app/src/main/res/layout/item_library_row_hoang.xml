@@ -4,20 +4,17 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:paddingVertical="8dp"
-    android:paddingHorizontal="16dp"
+    android:padding="12dp"
     android:gravity="center_vertical">
 
     <androidx.cardview.widget.CardView
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        app:cardCornerRadius="4dp"
-        app:cardElevation="0dp">
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        app:cardCornerRadius="4dp">
         <ImageView
             android:id="@+id/imgThumb"
             android:src="@drawable/ic_launcher_background"
             android:scaleType="centerCrop"
-            android:background="#7C4DFF"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
     </androidx.cardview.widget.CardView>
@@ -30,34 +27,22 @@
         android:layout_marginStart="12dp">
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:id="@+id/tvTitle"
-            android:text="Liked Songs"
+            android:text="Tên Playlist"
             android:textColor="@color/white"
             android:textSize="16sp"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginTop="4dp">
-
-            <ImageView
-                android:src="@drawable/ic_launcher_foreground"
-                android:layout_width="12dp"
-                android:layout_height="12dp"
-                app:tint="#1DB954"
-                android:layout_marginEnd="4dp"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/tvSubtitle"
-                android:text="Playlist • 58 songs"
-                android:textColor="#B3B3B3"
-                android:textSize="13sp"/>
-        </LinearLayout>
+        <TextView
+            android:id="@+id/tvSubtitle"
+            android:text="Playlist • Hoàng • 20 bài"
+            android:textColor="#B3B3B3"
+            android:textSize="13sp"
+            android:layout_marginTop="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
     </LinearLayout>
+
 </LinearLayout>
