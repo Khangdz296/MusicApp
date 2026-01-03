@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#121212"
-    android:orientation="vertical"
-    android:paddingBottom="100dp">
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -40,85 +38,28 @@
             android:layout_weight="1"/>
 
         <ImageView
+            android:id="@+id/btnAdd"
             android:src="@drawable/add"
             android:layout_width="26dp"
             android:layout_height="26dp"
             app:tint="@color/white"/>
     </LinearLayout>
 
-    <HorizontalScrollView
+    <com.google.android.material.tabs.TabLayout
+        android:contentDescription="Danh mục thư viện"
+        android:id="@+id/tabLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:scrollbars="none"
-        android:paddingStart="16dp"
-        android:paddingBottom="12dp">
+        android:background="#121212"
+        app:tabTextColor="#888888"
+        app:tabSelectedTextColor="@color/white"
+        app:tabIndicatorColor="#00BCD4"
+        app:tabMode="fixed"
+        app:tabGravity="fill"/>
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Playlists"
-                android:textColor="@color/white"
-                android:background="@drawable/bg_chip_fake"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="8dp"
-                android:textSize="12sp"
-                android:layout_marginEnd="8dp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Favorite"
-                android:textColor="@color/white"
-                android:background="@drawable/bg_chip_fake"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="8dp"
-                android:textSize="12sp"
-                android:layout_marginEnd="8dp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Albums"
-                android:textColor="@color/white"
-                android:background="@drawable/bg_chip_fake"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="8dp"
-                android:textSize="12sp"/>
-        </LinearLayout>
-    </HorizontalScrollView>
-
-    <RelativeLayout
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="8dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="⇅ Recently played"
-            android:textColor="#B3B3B3"
-            android:textSize="12sp"
-            android:layout_centerVertical="true"/>
-
-        <ImageView
-            android:src="@drawable/foreground"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_alignParentEnd="true"
-            app:tint="#B3B3B3"/> </RelativeLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvLibrary"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:listitem="@layout/item_library_row_hoang"
-        tools:itemCount="8"/>
+        android:layout_height="match_parent"/>
 
 </LinearLayout>
