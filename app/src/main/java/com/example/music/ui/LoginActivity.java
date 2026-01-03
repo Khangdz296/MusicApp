@@ -167,7 +167,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void navigateToHome() {
-        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+        Intent intent = new Intent(LoginActivity.this, MenuActivity.class); // Thay MainActivity → ProfileActivity
         startActivity(intent);
         finish();
     }
