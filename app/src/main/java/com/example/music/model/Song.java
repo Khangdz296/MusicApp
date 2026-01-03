@@ -1,21 +1,25 @@
 package com.example.music.model;
+
 import java.io.Serializable;
 
 public class Song implements Serializable {
-    private String id;          // ID duy nhất (VD: "song01")
-    private String title;       // Tên bài hát (VD: "Chúng ta của hiện tại")
-    private String artist;      // Tên ca sĩ (VD: "Sơn Tùng M-TP")
-    private String imageUrl;    // Link ảnh bìa (VD: "https://example.com/anh.jpg")
-    private String fileUrl;     // Link file nhạc mp3 (VD: "https://example.com/nhac.mp3")
-    private int duration;       // Thời lượng (tính bằng giây)
-    private boolean isFavorite; // Trạng thái yêu thích (true/false)
+    // 👇 SỬA 1: Đổi String thành Long để khớp với Backend
+    private Long id;
 
-    // 1. Constructor rỗng (Cần thiết nếu sau này dùng Firebase)
+    private String title;
+    private String artist;
+    private String imageUrl;
+    private String fileUrl;
+    private int duration;
+    private boolean isFavorite;
+
+    // 👇 SỬA 2: Thêm đối tượng Category để hứng dữ liệu thể loại từ API
+    private Category category;
+
     public Song() {
     }
 
-    // 2. Constructor đầy đủ (Dùng để tạo dữ liệu giả)
-    public Song(String id, String title, String artist, String imageUrl, String fileUrl, int duration, boolean isFavorite) {
+    public Song(Long id, String title, String artist, String imageUrl, String fileUrl, int duration, boolean isFavorite, Category category) {
         this.id = id;
         this.title = title;
         this.artist = artist;
@@ -23,12 +27,14 @@ public class Song implements Serializable {
         this.fileUrl = fileUrl;
         this.duration = duration;
         this.isFavorite = isFavorite;
+        this.category = category;
     }
 
-    // 3. Getter và Setter (Để lấy và sửa dữ liệu)
+    // --- Getters và Setters ---
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    // Nhớ sửa kiểu trả về là Long
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
@@ -47,4 +53,8 @@ public class Song implements Serializable {
 
     public boolean isFavorite() { return isFavorite; }
     public void setFavorite(boolean favorite) { isFavorite = favorite; }
+
+    // Getter Setter cho Category
+    public Category getCategory() { return category; }
+    public void setCategory(Category category) { this.category = category; }
 }
