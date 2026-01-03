@@ -5,9 +5,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.bumptech.glide.Glide; // Import thư viện Glide
+
+import com.bumptech.glide.Glide;
 import com.example.music.R;
 import com.example.music.model.Song;
 
@@ -17,29 +19,36 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
 
     private List<Song> mList;
     private int type;
+    private OnSongClickListener listener; // 👇 Biến lắng nghe sự kiện click
 
     // Định nghĩa các hằng số kiểu hiển thị
-    public static final int TYPE_BANNER = 1;   // Hình to (Banner)
-    public static final int TYPE_STANDARD = 2; // Hình vuông (Nhạc mới, BXH)
-    public static final int TYPE_RECENT = 3;   // Hình nhỏ (Nghe gần đây)
+    public static final int TYPE_BANNER = 1;
+    public static final int TYPE_STANDARD = 2;
+    public static final int TYPE_RECENT = 3;
 
-    // Constructor
-    public SongAdapter(List<Song> list, int type) {
+    // 👇 1. Tạo Interface để bắn tín hiệu ra ngoài khi bấm vào bài hát
+    public interface OnSongClickListener {
+        void onSongClick(Song song);
+    }
+
+    // 👇 2. Cập nhật Constructor thêm tham số 'listener'
+    public SongAdapter(List<Song> list, int type, OnSongClickListener listener) {
         this.mList = list;
         this.type = type;
+        this.listener = listener;
     }
 
     @NonNull
     @Override
     public SongViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         int layoutId;
-        // 👇 Chọn layout dựa trên biến type (Khớp với tên file của bạn)
+        // Chọn layout dựa trên biến type
         if (type == TYPE_BANNER) {
             layoutId = R.layout.item_banner_hoang;
         } else if (type == TYPE_RECENT) {
             layoutId = R.layout.item_recent_hoang;
         } else {
-            layoutId = R.layout.item_square_hoang; // Mặc định
+            layoutId = R.layout.item_square_hoang;
         }
 
         View view = LayoutInflater.from(parent.getContext()).inflate(layoutId, parent, false);
@@ -51,22 +60,28 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
         Song song = mList.get(position);
         if (song == null) return;
 
-        // 1. Gán chữ (Dùng Getter trong Song.java)
+        // Gán dữ liệu lên giao diện
         if (holder.tvTitle != null) {
             holder.tvTitle.setText(song.getTitle());
         }
 
-        // Gán tên ca sĩ (nếu View đó có hiển thị dòng phụ)
         if (holder.tvArtist != null) {
             holder.tvArtist.setText(song.getArtist());
         }
 
-        // 2. LOAD ẢNH TỪ URL BẰNG GLIDE ✅
+        // Load ảnh bằng Glide
         Glide.with(holder.itemView.getContext())
-                .load(song.getImageUrl()) // Lấy link ảnh từ Song.java
-                .placeholder(R.drawable.ic_launcher_background) // Ảnh chờ
-                .error(R.drawable.ic_launcher_background) // Ảnh lỗi
-                .into(holder.imgThumb); // Đổ vào ImageView
+                .load(song.getImageUrl())
+                .placeholder(R.drawable.ic_launcher_background)
+                .error(R.drawable.ic_launcher_background)
+                .into(holder.imgThumb);
+
+        // 👇 3. Bắt sự kiện Click vào bài hát
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onSongClick(song); // Truyền bài hát được chọn ra ngoài
+            }
+        });
     }
 
     @Override
@@ -80,16 +95,11 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
 
         public SongViewHolder(@NonNull View itemView) {
             super(itemView);
-
-            // 1. Ánh xạ các thành phần chung (Bắt buộc phải giống ID trong XML)
             imgThumb = itemView.findViewById(R.id.imgThumb);
             tvTitle = itemView.findViewById(R.id.tvTitle);
 
-            // 2. Xử lý logic tìm ID cho dòng chữ phụ (Ca sĩ / Subtitle)
-            // Ưu tiên tìm ID 'tvArtist' trước (dùng cho item_square, item_recent)
+            // Tìm view phụ (Artist hoặc Subtitle tùy layout)
             tvArtist = itemView.findViewById(R.id.tvArtist);
-
-            // Nếu không tìm thấy tvArtist (nghĩa là đang ở layout Banner dùng ID tvSubtitle)
             if (tvArtist == null) {
                 tvArtist = itemView.findViewById(R.id.tvSubtitle);
             }
