@@ -57,14 +57,12 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         String username = name;
-
         User user = new User(username, email, name, password);
 
         Log.d(TAG, "=== BẮT ĐẦU ĐĂNG KÝ ===");
         Log.d(TAG, "Username: " + username);
         Log.d(TAG, "Email: " + email);
         Log.d(TAG, "Name: " + name);
-        Log.d(TAG, "Password: " + password);
         Log.d(TAG, "API URL: " + RetrofitClient.getClient().baseUrl());
 
         apiService.register(user).enqueue(new Callback<RegisterResponse>() {
@@ -72,24 +70,24 @@ public class RegisterActivity extends AppCompatActivity {
             public void onResponse(Call<RegisterResponse> call, Response<RegisterResponse> response) {
                 Log.d(TAG, "=== NHẬN RESPONSE ===");
                 Log.d(TAG, "Response Code: " + response.code());
-                Log.d(TAG, "Response Message: " + response.message());
 
                 if (response.isSuccessful()) {
                     RegisterResponse res = response.body();
                     if (res != null) {
-                        Log.d(TAG, "SUCCESS: " + res.getMessage());
+                        Log.d(TAG, "✅ SUCCESS: " + res.getMessage());
                         Log.d(TAG, "Test OTP: " + res.getTest_otp());
 
                         Toast.makeText(RegisterActivity.this,
                                 "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
 
+                        // Chuyển sang VerifyOtpActivity
                         Intent i = new Intent(RegisterActivity.this, VerifyOtpActivity.class);
                         i.putExtra("username", username);
                         i.putExtra("otp_test", res.getTest_otp());
                         startActivity(i);
                         finish();
                     } else {
-                        Log.e(TAG, "Response body is null");
+                        Log.e(TAG, "❌ Response body is null");
                         Toast.makeText(RegisterActivity.this,
                                 "Lỗi: Không nhận được dữ liệu từ server", Toast.LENGTH_LONG).show();
                     }
@@ -101,7 +99,6 @@ public class RegisterActivity extends AppCompatActivity {
                             String errorBody = response.errorBody().string();
                             Log.e(TAG, "ERROR BODY: " + errorBody);
 
-                            // Parse JSON error
                             JSONObject errorJson = new JSONObject(errorBody);
                             if (errorJson.has("message")) {
                                 errorMsg = errorJson.getString("message");
@@ -113,7 +110,7 @@ public class RegisterActivity extends AppCompatActivity {
                         Log.e(TAG, "Exception khi parse error: " + e.getMessage());
                     }
 
-                    Log.e(TAG, "ĐĂNG KÝ THẤT BẠI");
+                    Log.e(TAG, "❌ ĐĂNG KÝ THẤT BẠI");
                     Log.e(TAG, "Error Code: " + response.code());
                     Log.e(TAG, "Error Message: " + errorMsg);
 
@@ -127,8 +124,6 @@ public class RegisterActivity extends AppCompatActivity {
                 Log.e(TAG, "=== NETWORK FAILURE ===");
                 Log.e(TAG, "Exception: " + t.getClass().getName());
                 Log.e(TAG, "Message: " + t.getMessage());
-                Log.e(TAG, "Cause: " + (t.getCause() != null ? t.getCause().getMessage() : "null"));
-
                 t.printStackTrace();
 
                 String errorMsg = "Không kết nối được server";
@@ -138,13 +133,10 @@ public class RegisterActivity extends AppCompatActivity {
                             "1. Backend có chạy không?\n" +
                             "2. URL có đúng không?\n" +
                             "3. Emulator dùng 10.0.2.2 thay vì localhost";
-                } else if (t instanceof IllegalStateException) {
-                    errorMsg = "Lỗi parse JSON response";
                 }
 
                 Toast.makeText(RegisterActivity.this, errorMsg, Toast.LENGTH_LONG).show();
             }
         });
     }
-
 }
