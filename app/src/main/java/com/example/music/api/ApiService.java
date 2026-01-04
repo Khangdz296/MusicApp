@@ -1,5 +1,7 @@
 package com.example.music.api;
 
+import com.example.music.model.Artist;
+import com.example.music.model.Category;
 import com.example.music.model.LoginRequest;
 import com.example.music.model.LoginResponse;
 import com.example.music.model.ProfileResponse;
@@ -17,6 +19,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 
 public interface ApiService {
 
@@ -38,8 +41,21 @@ public interface ApiService {
     @GET("api/songs")
     Call<List<Song>> getAllSongs();
 
-    // Gọi API nhạc mới (nếu Backend có)
+    // Gọi API nhạc mới
     @GET("api/songs/new-updated")
     Call<List<Song>> getNewSongs();
 
+    @GET("api/categories")
+    Call<List<Category>> getAllCategories();
+
+    // API lấy bài hát theo danh mục
+    @GET("api/categories/{id}/songs")
+    Call<List<Song>> getSongsByCategory(@Path("id") Long id);
+
+
+    @GET("api/artists")
+    Call<List<Artist>> getAllArtists();
+
+    @GET("api/artists/{id}/songs")
+    Call<List<Song>> getSongsByArtist(@Path("id") Long id);
 }
