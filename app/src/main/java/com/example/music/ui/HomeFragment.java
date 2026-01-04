@@ -14,16 +14,17 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.music.R;
-import com.example.music.api.ApiService;     // Import Interface API
-import com.example.music.api.RetrofitClient; // 👇 Import đúng file của bạn
 import com.example.music.adapter.ArtistAdapter;
 import com.example.music.adapter.CategoryAdapter;
 import com.example.music.adapter.SongAdapter;
+import com.example.music.api.ApiService;
+import com.example.music.api.RetrofitClient;
 import com.example.music.model.Artist;
 import com.example.music.model.Category;
 import com.example.music.model.Song;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import retrofit2.Call;
@@ -33,64 +34,78 @@ import retrofit2.Response;
 public class HomeFragment extends Fragment {
 
     private RecyclerView rvBanner, rvNewReleases, rvCharts, rvRecentlyPlayed, rvArtists, rvCategories;
-    private ApiService apiService; // Biến này dùng để gọi API
+    private ApiService apiService;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home_hoang, container, false);
 
-        // 1. Ánh xạ View
-        rvRecentlyPlayed = view.findViewById(R.id.rvRecentlyPlayed);
+        // 1. ÁNH XẠ VIEW
         rvBanner = view.findViewById(R.id.rvHighlight);
         rvNewReleases = view.findViewById(R.id.rvNewReleases);
         rvCharts = view.findViewById(R.id.rvCharts);
+        rvRecentlyPlayed = view.findViewById(R.id.rvRecentlyPlayed);
         rvArtists = view.findViewById(R.id.rvArtists);
         rvCategories = view.findViewById(R.id.rvCategories);
 
-        // 2. KHỞI TẠO API SERVICE (Sửa lại cho đúng với RetrofitClient của bạn) 🛠️
-        // RetrofitClient.getClient() trả về Retrofit -> dùng .create() để tạo ApiService
+        // 2. KHỞI TẠO API
         apiService = RetrofitClient.getClient().create(ApiService.class);
 
         // 3. GỌI DỮ LIỆU TỪ SERVER
-        fetchSongsData();
-
-        // Setup phần Nghệ sĩ & Thể loại (Mock tạm)
-        setupArtists();
-        setupCategories();
+        fetchBannerAndCharts(); // Xử lý 3 mục: Banner, BXH, Gần đây
+        fetchNewSongs();        // Xử lý mục: Nhạc mới phát hành
+        setupArtists();         // Xử lý mục: Nghệ sĩ (API thật)
+        setupCategories();      // Xử lý mục: Thể loại (API thật)
 
         return view;
     }
 
-    // --- HÀM GỌI API (Giữ nguyên) ---
-    private void fetchSongsData() {
-        // GỌI API 1: Lấy toàn bộ bài hát
+    private void fetchBannerAndCharts() {
         apiService.getAllSongs().enqueue(new Callback<List<Song>>() {
             @Override
             public void onResponse(Call<List<Song>> call, Response<List<Song>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Song> allSongs = response.body();
 
-                    // Đổ dữ liệu vào các Recycler View
-                    setupSection(rvBanner, allSongs, SongAdapter.TYPE_BANNER);
-                    setupSection(rvCharts, allSongs, SongAdapter.TYPE_STANDARD);
-                    setupSection(rvRecentlyPlayed, allSongs, SongAdapter.TYPE_RECENT);
+                    if (allSongs.isEmpty()) return;
 
-                    Log.d("API_MUSIC", "Lấy thành công: " + allSongs.size() + " bài");
-                } else {
-                    Log.e("API_ERROR", "Response code: " + response.code());
-                    Toast.makeText(getContext(), "Không lấy được dữ liệu nhạc", Toast.LENGTH_SHORT).show();
+                    // A. BANNER: Lấy 5 bài đầu tiên
+                    List<Song> bannerList = new ArrayList<>();
+                    if (allSongs.size() >= 5) {
+                        bannerList = allSongs.subList(0, 5);
+                    } else {
+                        bannerList = allSongs;
+                    }
+                    setupSection(rvBanner, bannerList, SongAdapter.TYPE_BANNER);
+
+                    // B. BXH (CHARTS): Xáo trộn danh sách ngẫu nhiên -> Lấy 7 bài
+                    List<Song> chartList = new ArrayList<>(allSongs);
+                    Collections.shuffle(chartList);
+                    if (chartList.size() > 7) {
+                        chartList = chartList.subList(0, 7);
+                    }
+                    setupSection(rvCharts, chartList, SongAdapter.TYPE_STANDARD);
+
+                    // C. NGHE GẦN ĐÂY: Lấy 3 bài cuối danh sách (Giả lập)
+                    List<Song> recentList = new ArrayList<>();
+                    if (allSongs.size() > 3) {
+                        recentList = allSongs.subList(allSongs.size() - 3, allSongs.size());
+                    } else {
+                        recentList = allSongs;
+                    }
+                    setupSection(rvRecentlyPlayed, recentList, SongAdapter.TYPE_RECENT);
                 }
             }
 
             @Override
             public void onFailure(Call<List<Song>> call, Throwable t) {
-                Log.e("API_ERROR", "Lỗi kết nối: " + t.getMessage());
-                Toast.makeText(getContext(), "Lỗi mạng! Kiểm tra Server Spring Boot", Toast.LENGTH_LONG).show();
+                Log.e("API_SONG", "Lỗi lấy All Songs: " + t.getMessage());
             }
         });
+    }
 
-        // GỌI API 2: Lấy nhạc Mới (Nếu bạn đã có endpoint này bên ApiService)
+    private void fetchNewSongs() {
         apiService.getNewSongs().enqueue(new Callback<List<Song>>() {
             @Override
             public void onResponse(Call<List<Song>> call, Response<List<Song>> response) {
@@ -102,46 +117,92 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<Song>> call, Throwable t) {
-                // Ignore error
+                Log.e("API_SONG", "Lỗi lấy New Songs: " + t.getMessage());
             }
         });
     }
 
-    // --- SETUP ADAPTER ---
+    // Hàm chung để cài đặt Adapter cho các list nhạc
     private void setupSection(RecyclerView rv, List<Song> data, int type) {
-        if (getContext() == null) return;
+        if (getContext() == null || data == null || data.isEmpty()) {
+            rv.setVisibility(View.GONE); // Ẩn nếu không có dữ liệu
+            return;
+        }
+        rv.setVisibility(View.VISIBLE);
 
-        SongAdapter adapter = new SongAdapter(data, type, song -> {
-            Toast.makeText(getContext(), "Đang mở bài: " + song.getTitle(), Toast.LENGTH_SHORT).show();
+        SongAdapter adapter = new SongAdapter(data, type, new SongAdapter.OnSongClickListener() {
+            @Override
+            public void onSongClick(Song song) {
+                // SỰ KIỆN CLICK VÀO BÀI HÁT
+                Toast.makeText(getContext(), "Phát: " + song.getTitle(), Toast.LENGTH_SHORT).show();
+
+                // TODO: Chuyển sang PlayMusicActivity
+                // Intent intent = new Intent(getContext(), PlayMusicActivity.class);
+                // intent.putExtra("song_data", song); // Song phải implements Serializable
+                // startActivity(intent);
+            }
         });
 
         rv.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         rv.setAdapter(adapter);
     }
 
-    // --- MOCK DATA ARTIST ---
-    private void setupArtists() {
-        List<Artist> artists = new ArrayList<>();
-        artists.add(new Artist("1", "Sơn Tùng", "https://picsum.photos/200/200?random=10"));
-        artists.add(new Artist("2", "JustaTee", "https://picsum.photos/200/200?random=11"));
 
-        ArtistAdapter adapter = new ArtistAdapter(getContext(), artists, artist -> {
-            Toast.makeText(getContext(), "Ca sĩ: " + artist.getName(), Toast.LENGTH_SHORT).show();
+    private void setupArtists() {
+        apiService.getAllArtists().enqueue(new Callback<List<Artist>>() {
+            @Override
+            public void onResponse(Call<List<Artist>> call, Response<List<Artist>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Artist> artists = response.body();
+
+                    if (artists.isEmpty()) {
+                        rvArtists.setVisibility(View.GONE);
+                        return;
+                    }
+                    rvArtists.setVisibility(View.VISIBLE);
+
+                    ArtistAdapter adapter = new ArtistAdapter(getContext(), artists, artist -> {
+                        Toast.makeText(getContext(), "Ca sĩ: " + artist.getName(), Toast.LENGTH_SHORT).show();
+                    });
+
+                    rvArtists.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+                    rvArtists.setAdapter(adapter);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Artist>> call, Throwable t) {
+                Log.e("API_ARTIST", "Lỗi: " + t.getMessage());
+            }
         });
-        rvArtists.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        rvArtists.setAdapter(adapter);
     }
 
-    // --- MOCK DATA CATEGORY ---
     private void setupCategories() {
-        List<Category> categories = new ArrayList<>();
-        categories.add(new Category(1L, "V-Pop", "https://picsum.photos/200/200?random=20"));
-        categories.add(new Category(2L, "K-Pop", "https://picsum.photos/200/200?random=21"));
+        apiService.getAllCategories().enqueue(new Callback<List<Category>>() {
+            @Override
+            public void onResponse(Call<List<Category>> call, Response<List<Category>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Category> categories = response.body();
 
-        CategoryAdapter adapter = new CategoryAdapter(getContext(), categories, category -> {
-            Toast.makeText(getContext(), "Thể loại: " + category.getName(), Toast.LENGTH_SHORT).show();
+                    if (categories.isEmpty()) {
+                        rvCategories.setVisibility(View.GONE);
+                        return;
+                    }
+                    rvCategories.setVisibility(View.VISIBLE);
+
+                    CategoryAdapter adapter = new CategoryAdapter(getContext(), categories, category -> {
+                        Toast.makeText(getContext(), "Thể loại: " + category.getName(), Toast.LENGTH_SHORT).show();
+                    });
+
+                    rvCategories.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+                    rvCategories.setAdapter(adapter);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Category>> call, Throwable t) {
+                Log.e("API_CATEGORY", "Lỗi: " + t.getMessage());
+            }
         });
-        rvCategories.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        rvCategories.setAdapter(adapter);
     }
 }
