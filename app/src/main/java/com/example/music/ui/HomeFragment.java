@@ -13,6 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.example.music.R;
+import com.example.music.adapter.ArtistAdapter;
+import com.example.music.adapter.CategoryAdapter;
+import com.example.music.adapter.SongAdapter;
+import com.example.music.model.Artist;
+import com.example.music.model.Category;
+import com.example.music.model.Song;
 
 public class HomeFragment extends Fragment {
 

@@ -3,31 +3,75 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@drawable/bg_bottom_sheet"
-    android:padding="16dp">
+    android:background="@color/spotify_dark_gray"
+    android:padding="0dp">
 
+    <!-- Handle Bar -->
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="8dp"
+        android:background="@color/spotify_gray"
+        android:alpha="0.5"/>
+
+    <!-- Header -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Thêm vào Playlist"
-        android:textColor="#333333"
+        android:textColor="@color/white"
         android:textSize="18sp"
         android:textStyle="bold"
         android:gravity="center"
-        android:layout_marginBottom="16dp"/>
+        android:padding="16dp"
+        android:fontFamily="sans-serif-medium"/>
 
+    <!-- Create New Playlist Button -->
+    <LinearLayout
+        android:id="@+id/btnCreateNewPlaylist"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:background="?attr/selectableItemBackground"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:src="@drawable/ic_add"
+            android:background="@color/spotify_light_gray"
+            android:padding="12dp"
+            app:tint="@color/white"
+            xmlns:app="http://schemas.android.com/apk/res-auto"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tạo playlist mới"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:layout_marginStart="12dp"
+            android:fontFamily="sans-serif-medium"/>
+    </LinearLayout>
+
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/spotify_light_gray"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:alpha="0.3"/>
+
+    <!-- Playlists List -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvUserPlaylists"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"/>
-
-    <Button
-        android:id="@+id/btnCreateNewPlaylist"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:backgroundTint="#333333"
-        android:text="+ Tạo playlist mới"
-        android:textColor="#FFFFFF" />
+        android:maxHeight="400dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="16dp"/>
 
 </LinearLayout>
