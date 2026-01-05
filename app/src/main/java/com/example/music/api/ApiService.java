@@ -2,6 +2,7 @@ package com.example.music.api;
 
 import com.example.music.model.Artist;
 import com.example.music.model.Category;
+import com.example.music.model.ChangePasswordResponse;
 import com.example.music.model.LoginRequest;
 import com.example.music.model.LoginResponse;
 import com.example.music.model.ProfileResponse;
@@ -12,6 +13,7 @@ import com.example.music.model.VerifyOtpRequest;
 import com.example.music.model.VerifyOtpResponse;
 
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -30,6 +32,10 @@ public interface ApiService {
     @POST("api/login")
     Call<LoginResponse> login(@Body LoginRequest loginRequest);  // ĐỔI CHỖ NÀY
 
+    @POST("api/change-password")
+    Call<ChangePasswordResponse> changePassword(
+            @Header("X-Session-Key") String sessionKey,
+            @Body Map<String, String> passwordData);
     @Headers("Content-Type: application/json")
     @POST("api/verify-otp")
     Call<VerifyOtpResponse> verifyOtp(@Body VerifyOtpRequest req);
