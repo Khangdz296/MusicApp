@@ -24,7 +24,6 @@ import com.example.music.model.Category;
 import com.example.music.model.Song;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import retrofit2.Call;
@@ -53,24 +52,25 @@ public class HomeFragment extends Fragment {
         apiService = RetrofitClient.getClient().create(ApiService.class);
 
         // 3. GỌI DỮ LIỆU TỪ SERVER
-        fetchBannerAndCharts(); // Xử lý 3 mục: Banner, BXH, Gần đây
-        fetchNewSongs();        // Xử lý mục: Nhạc mới phát hành
-        setupArtists();         // Xử lý mục: Nghệ sĩ (API thật)
-        setupCategories();      // Xử lý mục: Thể loại (API thật)
+        fetchBannerAndRecent(); // Sửa tên hàm: Chỉ lấy Banner và Gần đây từ list All
+        fetchCharts();          // MỚI: Gọi API BXH thật (Top Views)
+        fetchNewSongs();        // Nhạc mới phát hành
+        setupArtists();
+        setupCategories();
 
         return view;
     }
 
-    private void fetchBannerAndCharts() {
+    // --- 1. LOGIC CŨ (SỬA LẠI): Chỉ lấy Banner và Gần đây ---
+    private void fetchBannerAndRecent() {
         apiService.getAllSongs().enqueue(new Callback<List<Song>>() {
             @Override
             public void onResponse(Call<List<Song>> call, Response<List<Song>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Song> allSongs = response.body();
-
                     if (allSongs.isEmpty()) return;
 
-                    // A. BANNER: Lấy 5 bài đầu tiên
+                    // A. BANNER: Lấy 5 bài đầu
                     List<Song> bannerList = new ArrayList<>();
                     if (allSongs.size() >= 5) {
                         bannerList = allSongs.subList(0, 5);
@@ -79,15 +79,7 @@ public class HomeFragment extends Fragment {
                     }
                     setupSection(rvBanner, bannerList, SongAdapter.TYPE_BANNER);
 
-                    // B. BXH (CHARTS): Xáo trộn danh sách ngẫu nhiên -> Lấy 7 bài
-                    List<Song> chartList = new ArrayList<>(allSongs);
-                    Collections.shuffle(chartList);
-                    if (chartList.size() > 7) {
-                        chartList = chartList.subList(0, 7);
-                    }
-                    setupSection(rvCharts, chartList, SongAdapter.TYPE_STANDARD);
-
-                    // C. NGHE GẦN ĐÂY: Lấy 3 bài cuối danh sách (Giả lập)
+                    // B. NGHE GẦN ĐÂY: Lấy 3 bài cuối
                     List<Song> recentList = new ArrayList<>();
                     if (allSongs.size() > 3) {
                         recentList = allSongs.subList(allSongs.size() - 3, allSongs.size());
@@ -95,6 +87,8 @@ public class HomeFragment extends Fragment {
                         recentList = allSongs;
                     }
                     setupSection(rvRecentlyPlayed, recentList, SongAdapter.TYPE_RECENT);
+
+                    // ⚠️ ĐÃ XÓA PHẦN SHUFFLE CHART Ở ĐÂY ĐỂ DÙNG API RIÊNG BÊN DƯỚI
                 }
             }
 
@@ -105,6 +99,27 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    // --- 2. LOGIC MỚI: GỌI API TOP VIEWS ---
+    private void fetchCharts() {
+        // Gọi API getTopSongs mà mình vừa bảo bạn thêm vào ApiService
+        apiService.getTopSongs().enqueue(new Callback<List<Song>>() {
+            @Override
+            public void onResponse(Call<List<Song>> call, Response<List<Song>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Song> topSongs = response.body();
+                    // Đổ dữ liệu thật vào BXH
+                    setupSection(rvCharts, topSongs, SongAdapter.TYPE_STANDARD);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Song>> call, Throwable t) {
+                Log.e("API_CHART", "Lỗi lấy BXH: " + t.getMessage());
+            }
+        });
+    }
+
+    // --- 3. LOGIC NHẠC MỚI (Giữ nguyên) ---
     private void fetchNewSongs() {
         apiService.getNewSongs().enqueue(new Callback<List<Song>>() {
             @Override
@@ -117,15 +132,15 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<Song>> call, Throwable t) {
-                Log.e("API_SONG", "Lỗi lấy New Songs: " + t.getMessage());
+                Log.e("API_NEW", "Lỗi lấy New Songs: " + t.getMessage());
             }
         });
     }
 
-    // Hàm chung để cài đặt Adapter cho các list nhạc
+    // --- HÀM CHUNG SETUP ADAPTER ---
     private void setupSection(RecyclerView rv, List<Song> data, int type) {
         if (getContext() == null || data == null || data.isEmpty()) {
-            rv.setVisibility(View.GONE); // Ẩn nếu không có dữ liệu
+            rv.setVisibility(View.GONE);
             return;
         }
         rv.setVisibility(View.VISIBLE);
@@ -133,13 +148,8 @@ public class HomeFragment extends Fragment {
         SongAdapter adapter = new SongAdapter(data, type, new SongAdapter.OnSongClickListener() {
             @Override
             public void onSongClick(Song song) {
-                // SỰ KIỆN CLICK VÀO BÀI HÁT
                 Toast.makeText(getContext(), "Phát: " + song.getTitle(), Toast.LENGTH_SHORT).show();
-
-                // TODO: Chuyển sang PlayMusicActivity
-                // Intent intent = new Intent(getContext(), PlayMusicActivity.class);
-                // intent.putExtra("song_data", song); // Song phải implements Serializable
-                // startActivity(intent);
+                // TODO: Code chuyển Activity
             }
         });
 
@@ -147,29 +157,23 @@ public class HomeFragment extends Fragment {
         rv.setAdapter(adapter);
     }
 
-
+    // --- ARTISTS & CATEGORIES (Giữ nguyên) ---
     private void setupArtists() {
         apiService.getAllArtists().enqueue(new Callback<List<Artist>>() {
             @Override
             public void onResponse(Call<List<Artist>> call, Response<List<Artist>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Artist> artists = response.body();
-
-                    if (artists.isEmpty()) {
-                        rvArtists.setVisibility(View.GONE);
-                        return;
-                    }
+                    if (artists.isEmpty()) { rvArtists.setVisibility(View.GONE); return; }
                     rvArtists.setVisibility(View.VISIBLE);
 
                     ArtistAdapter adapter = new ArtistAdapter(getContext(), artists, artist -> {
                         Toast.makeText(getContext(), "Ca sĩ: " + artist.getName(), Toast.LENGTH_SHORT).show();
                     });
-
                     rvArtists.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
                     rvArtists.setAdapter(adapter);
                 }
             }
-
             @Override
             public void onFailure(Call<List<Artist>> call, Throwable t) {
                 Log.e("API_ARTIST", "Lỗi: " + t.getMessage());
@@ -183,22 +187,16 @@ public class HomeFragment extends Fragment {
             public void onResponse(Call<List<Category>> call, Response<List<Category>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Category> categories = response.body();
-
-                    if (categories.isEmpty()) {
-                        rvCategories.setVisibility(View.GONE);
-                        return;
-                    }
+                    if (categories.isEmpty()) { rvCategories.setVisibility(View.GONE); return; }
                     rvCategories.setVisibility(View.VISIBLE);
 
                     CategoryAdapter adapter = new CategoryAdapter(getContext(), categories, category -> {
                         Toast.makeText(getContext(), "Thể loại: " + category.getName(), Toast.LENGTH_SHORT).show();
                     });
-
                     rvCategories.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
                     rvCategories.setAdapter(adapter);
                 }
             }
-
             @Override
             public void onFailure(Call<List<Category>> call, Throwable t) {
                 Log.e("API_CATEGORY", "Lỗi: " + t.getMessage());

@@ -58,4 +58,7 @@ public interface ApiService {
 
     @GET("api/artists/{id}/songs")
     Call<List<Song>> getSongsByArtist(@Path("id") Long id);
+
+    @GET("api/songs/top-views")
+    Call<List<Song>> getTopSongs();
 }

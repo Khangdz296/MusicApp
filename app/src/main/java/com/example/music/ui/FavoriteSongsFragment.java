@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.music.adapter.FavoriteSongAdapter;
-import com.example.music.model.Category; // Nhớ import Category
+import com.example.music.model.Category;
 import com.example.music.model.Song;
 
 import java.util.ArrayList;
@@ -24,28 +24,35 @@ public class FavoriteSongsFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // Tạo RecyclerView bằng code (không cần tạo file XML riêng)
+        // 1. Tạo RecyclerView bằng code (Background tối màu)
         RecyclerView recyclerView = new RecyclerView(getContext());
         recyclerView.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
-        recyclerView.setBackgroundColor(0xFF121212); // Màu nền tối
+        recyclerView.setBackgroundColor(0xFF121212); // Màu nền đen
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // --- TẠO DỮ LIỆU GIẢ ---
+        // --- 2. TẠO DỮ LIỆU GIẢ (MOCK DATA) ---
         List<Song> list = new ArrayList<>();
 
-        // 1. Tạo một Category giả để nhét vào Song (cho code đỡ báo lỗi null)
-        Category catPop = new Category(1L, "V-Pop", "");
+        // Tạo Category giả (ID là Long 1L)
+        Category catPop = new Category(1L, "V-Pop", "https://example.com/image.png");
 
-        // 2. Tạo Song với Constructor MỚI (Long id, ..., Category)
-        list.add(new Song(1L, "Muộn Rồi Mà Sao Còn", "Sơn Tùng M-TP", "https://picsum.photos/200/200?random=7", "", 300, true, catPop));
-        list.add(new Song(2L, "Nàng Thơ", "Hoàng Dũng", "https://picsum.photos/200/200?random=8", "", 300, true, catPop));
-        list.add(new Song(3L, "Waiting For You", "MONO", "https://picsum.photos/200/200?random=9", "", 280, true, catPop));
+        // 👇 CẬP NHẬT CONSTRUCTOR SONG (Thêm số view vào cuối cùng)
+        // new Song(id, title, artist, img, file, duration, isFavorite, category, VIEWS)
 
-        // 3. Khởi tạo Adapter
-        // Lưu ý: Đảm bảo FavoriteSongAdapter của bạn đã có constructor nhận Listener nhé!
+        list.add(new Song(1L, "Muộn Rồi Mà Sao Còn", "Sơn Tùng M-TP",
+                "https://i.scdn.co/image/ab6761610000e5ebc53f7c462377b7f1e7373f52", "", 300, true, catPop, 1500000));
+
+        list.add(new Song(2L, "Nàng Thơ", "Hoàng Dũng",
+                "https://i.scdn.co/image/ab6761610000e5ebc6b73df78cb0ce400d43dfc6", "", 300, true, catPop, 850000));
+
+        list.add(new Song(3L, "Waiting For You", "MONO",
+                "https://i.scdn.co/image/ab6761610000e5eb54e7d44869c43d2cc95e54c8", "", 280, true, catPop, 2000000));
+
+        // 3. KHỞI TẠO ADAPTER
+        // Lưu ý: Đảm bảo class FavoriteSongAdapter của bạn đã nhận đúng Model Song mới
         FavoriteSongAdapter adapter = new FavoriteSongAdapter(getContext(), list, song -> {
             Toast.makeText(getContext(), "Phát bài: " + song.getTitle(), Toast.LENGTH_SHORT).show();
         });
