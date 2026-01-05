@@ -1,5 +1,7 @@
 package com.example.music;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MenuItem;
 
@@ -9,6 +11,8 @@ import androidx.fragment.app.Fragment;
 
 import com.example.music.ui.HomeFragment;
 import com.example.music.ui.LibraryFragment;
+import com.example.music.ui.LoginActivity;
+import com.example.music.ui.MenuActivity;
 import com.example.music.ui.SearchFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
@@ -53,10 +57,18 @@ public class MainActivity extends AppCompatActivity {
                     // selectedFragment = new LibraryFragment();
                 }
                 else if (id == R.id.nav_profile) {
-                    // Tương tự, tạm thời load Home
-                    selectedFragment = new HomeFragment();
-                    // selectedFragment = new ProfileFragment();
+
+                    if (isLoggedIn()) {
+                        Intent intent = new Intent(MainActivity.this, MenuActivity.class);
+                        startActivity(intent);
+                    } else {
+                        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                        startActivity(intent);
+                    }
+
+                    return false;
                 }
+
 
                 // Thực hiện thay thế màn hình
                 if (selectedFragment != null) {
@@ -75,4 +87,10 @@ public class MainActivity extends AppCompatActivity {
                 .replace(R.id.fragment_container, fragment)
                 .commit();
     }
+    private boolean isLoggedIn() {
+        SharedPreferences sp = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        String sessionKey = sp.getString("session_key", "");
+        return !sessionKey.isEmpty();
+    }
+
 }
