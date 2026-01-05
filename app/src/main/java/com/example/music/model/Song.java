@@ -1,25 +1,44 @@
 package com.example.music.model;
 
+import com.google.gson.annotations.SerializedName; // Import thư viện GSON
 import java.io.Serializable;
 
 public class Song implements Serializable {
-    // 👇 SỬA 1: Đổi String thành Long để khớp với Backend
+
+    //Dùng @SerializedName để đảm bảo tên biến khớp 100% với JSON Backend
+    @SerializedName("id")
     private Long id;
 
+    @SerializedName("title")
     private String title;
+
+    @SerializedName("artist")
     private String artist;
+
+    @SerializedName("imageUrl") // Backend có thể trả về "imageUrl" hoặc "image_url" tùy config
     private String imageUrl;
+
+    @SerializedName("fileUrl")
     private String fileUrl;
+
+    @SerializedName("duration")
     private int duration;
+
+    @SerializedName("favorite")
     private boolean isFavorite;
 
-    // 👇 SỬA 2: Thêm đối tượng Category để hứng dữ liệu thể loại từ API
+    @SerializedName("category")
     private Category category;
+
+    //MỚI THÊM: Biến này để hứng số lượt nghe làm BXH
+    @SerializedName("views")
+    private int views;
 
     public Song() {
     }
 
-    public Song(Long id, String title, String artist, String imageUrl, String fileUrl, int duration, boolean isFavorite, Category category) {
+    // Constructor cập nhật đầy đủ tham số
+    public Song(Long id, String title, String artist, String imageUrl, String fileUrl, int duration, boolean isFavorite, Category category, int views) {
         this.id = id;
         this.title = title;
         this.artist = artist;
@@ -28,11 +47,11 @@ public class Song implements Serializable {
         this.duration = duration;
         this.isFavorite = isFavorite;
         this.category = category;
+        this.views = views;
     }
 
     // --- Getters và Setters ---
 
-    // Nhớ sửa kiểu trả về là Long
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -54,7 +73,10 @@ public class Song implements Serializable {
     public boolean isFavorite() { return isFavorite; }
     public void setFavorite(boolean favorite) { isFavorite = favorite; }
 
-    // Getter Setter cho Category
     public Category getCategory() { return category; }
     public void setCategory(Category category) { this.category = category; }
+
+    // 👇 Getter & Setter cho Views
+    public int getViews() { return views; }
+    public void setViews(int views) { this.views = views; }
 }
