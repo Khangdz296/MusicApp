@@ -40,7 +40,6 @@ public class SearchFragment extends Fragment {
     private RecyclerView rcvCategories, rcvSearchResults;
     private TextView tvSubHeader;
     private EditText edtSearch;
-
     private CategoryAdapterK categoryAdapter;
     private SongAdapterK songAdapter;
 

@@ -1,5 +1,7 @@
 package com.example.music.ui;
 
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.music.R;
 import com.example.music.adapter.ArtistAdapter;
 import com.example.music.adapter.CategoryAdapter;
+import com.example.music.adapter.CategoryAdapterK;
 import com.example.music.adapter.SongAdapter;
 import com.example.music.api.ApiService;
 import com.example.music.api.RetrofitClient;
@@ -209,11 +212,19 @@ public class HomeFragment extends Fragment {
                     if (categories.isEmpty()) { rvCategories.setVisibility(View.GONE); return; }
                     rvCategories.setVisibility(View.VISIBLE);
 
-                    CategoryAdapter adapter = new CategoryAdapter(getContext(), categories, category -> {
-                        Toast.makeText(getContext(), "Thể loại: " + category.getName(), Toast.LENGTH_SHORT).show();
+                    CategoryAdapterK categoryAdapter = new CategoryAdapterK(categories, new CategoryAdapterK.IClickCategoryListener() {
+                        @Override
+                        public void onClick(Category category, int color) {
+                            // Chuyển sang màn hình Detail
+                            Intent intent = new Intent(getContext(), CategoryDetailActivity.class);
+                            intent.putExtra("CAT_ID", category.getId());
+                            intent.putExtra("CAT_NAME", category.getName());
+                            intent.putExtra("CAT_COLOR", color);
+                            startActivity(intent);
+                        }
                     });
                     rvCategories.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-                    rvCategories.setAdapter(adapter);
+                    rvCategories.setAdapter(categoryAdapter);
                 }
             }
             @Override
