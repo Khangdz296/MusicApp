@@ -22,6 +22,7 @@ import com.example.music.api.RetrofitClient;
 import com.example.music.model.Artist;
 import com.example.music.model.Category;
 import com.example.music.model.Song;
+import com.example.music.utils.RecentSongManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,17 +53,43 @@ public class HomeFragment extends Fragment {
         apiService = RetrofitClient.getClient().create(ApiService.class);
 
         // 3. GỌI DỮ LIỆU TỪ SERVER
-        fetchBannerAndRecent(); // Sửa tên hàm: Chỉ lấy Banner và Gần đây từ list All
-        fetchCharts();          // MỚI: Gọi API BXH thật (Top Views)
-        fetchNewSongs();        // Nhạc mới phát hành
-        setupArtists();
-        setupCategories();
+        fetchBanner();          // Lấy Banner từ Server
+        fetchCharts();          // Lấy BXH Top Views
+        fetchNewSongs();        // Lấy Nhạc mới
+        setupArtists();         // Lấy Nghệ sĩ
+        setupCategories();      // Lấy Thể loại
+
+        // 4. LOAD LỊCH SỬ NGHE (Từ bộ nhớ máy)
+        loadRecentSongs();
 
         return view;
     }
 
-    // --- 1. LOGIC CŨ (SỬA LẠI): Chỉ lấy Banner và Gần đây ---
-    private void fetchBannerAndRecent() {
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadRecentSongs();
+    }
+
+    // --- 1. LOGIC LOAD LỊCH SỬ TỪ MÁY (SHALED PREF) ---
+    private void loadRecentSongs() {
+        if (getContext() == null) return;
+
+        // Lấy danh sách thật từ RecentSongManager
+        List<Song> recentList = RecentSongManager.getRecentSongs(getContext());
+
+        if (!recentList.isEmpty()) {
+            rvRecentlyPlayed.setVisibility(View.VISIBLE);
+            // Dùng TYPE_RECENT để hiển thị kiểu danh sách ngang nhỏ gọn
+            setupSection(rvRecentlyPlayed, recentList, SongAdapter.TYPE_RECENT);
+        } else {
+            // Nếu chưa nghe bài nào thì ẩn đi cho gọn
+            rvRecentlyPlayed.setVisibility(View.GONE);
+        }
+    }
+
+    // --- 2. LOGIC LẤY BANNER (Đã tách phần Recent ra) ---
+    private void fetchBanner() {
         apiService.getAllSongs().enqueue(new Callback<List<Song>>() {
             @Override
             public void onResponse(Call<List<Song>> call, Response<List<Song>> response) {
@@ -70,7 +97,7 @@ public class HomeFragment extends Fragment {
                     List<Song> allSongs = response.body();
                     if (allSongs.isEmpty()) return;
 
-                    // A. BANNER: Lấy 5 bài đầu
+                    // Lấy 5 bài đầu làm Banner
                     List<Song> bannerList = new ArrayList<>();
                     if (allSongs.size() >= 5) {
                         bannerList = allSongs.subList(0, 5);
@@ -78,40 +105,25 @@ public class HomeFragment extends Fragment {
                         bannerList = allSongs;
                     }
                     setupSection(rvBanner, bannerList, SongAdapter.TYPE_BANNER);
-
-                    // B. NGHE GẦN ĐÂY: Lấy 3 bài cuối
-                    List<Song> recentList = new ArrayList<>();
-                    if (allSongs.size() > 3) {
-                        recentList = allSongs.subList(allSongs.size() - 3, allSongs.size());
-                    } else {
-                        recentList = allSongs;
-                    }
-                    setupSection(rvRecentlyPlayed, recentList, SongAdapter.TYPE_RECENT);
-
-                    // ⚠️ ĐÃ XÓA PHẦN SHUFFLE CHART Ở ĐÂY ĐỂ DÙNG API RIÊNG BÊN DƯỚI
                 }
             }
 
             @Override
             public void onFailure(Call<List<Song>> call, Throwable t) {
-                Log.e("API_SONG", "Lỗi lấy All Songs: " + t.getMessage());
+                Log.e("API_SONG", "Lỗi lấy Banner: " + t.getMessage());
             }
         });
     }
 
-    // --- 2. LOGIC MỚI: GỌI API TOP VIEWS ---
+    // --- 3. LOGIC TOP VIEWS ---
     private void fetchCharts() {
-        // Gọi API getTopSongs mà mình vừa bảo bạn thêm vào ApiService
         apiService.getTopSongs().enqueue(new Callback<List<Song>>() {
             @Override
             public void onResponse(Call<List<Song>> call, Response<List<Song>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    List<Song> topSongs = response.body();
-                    // Đổ dữ liệu thật vào BXH
-                    setupSection(rvCharts, topSongs, SongAdapter.TYPE_STANDARD);
+                    setupSection(rvCharts, response.body(), SongAdapter.TYPE_STANDARD);
                 }
             }
-
             @Override
             public void onFailure(Call<List<Song>> call, Throwable t) {
                 Log.e("API_CHART", "Lỗi lấy BXH: " + t.getMessage());
@@ -119,17 +131,15 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    // --- 3. LOGIC NHẠC MỚI (Giữ nguyên) ---
+    // --- 4. LOGIC NHẠC MỚI ---
     private void fetchNewSongs() {
         apiService.getNewSongs().enqueue(new Callback<List<Song>>() {
             @Override
             public void onResponse(Call<List<Song>> call, Response<List<Song>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    List<Song> newSongs = response.body();
-                    setupSection(rvNewReleases, newSongs, SongAdapter.TYPE_STANDARD);
+                    setupSection(rvNewReleases, response.body(), SongAdapter.TYPE_STANDARD);
                 }
             }
-
             @Override
             public void onFailure(Call<List<Song>> call, Throwable t) {
                 Log.e("API_NEW", "Lỗi lấy New Songs: " + t.getMessage());
@@ -137,7 +147,7 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    // --- HÀM CHUNG SETUP ADAPTER ---
+    // --- HÀM CHUNG SETUP ADAPTER (QUAN TRỌNG: CÓ LOGIC LƯU LỊCH SỬ) ---
     private void setupSection(RecyclerView rv, List<Song> data, int type) {
         if (getContext() == null || data == null || data.isEmpty()) {
             rv.setVisibility(View.GONE);
@@ -148,8 +158,19 @@ public class HomeFragment extends Fragment {
         SongAdapter adapter = new SongAdapter(data, type, new SongAdapter.OnSongClickListener() {
             @Override
             public void onSongClick(Song song) {
+                // 1. Thông báo
                 Toast.makeText(getContext(), "Phát: " + song.getTitle(), Toast.LENGTH_SHORT).show();
-                // TODO: Code chuyển Activity
+
+                // 2. 👇 LƯU BÀI VỪA BẤM VÀO LỊCH SỬ
+                RecentSongManager.saveSong(getContext(), song);
+
+                // 3. 👇 LOAD LẠI MỤC "NGHE GẦN ĐÂY" NGAY LẬP TỨC ĐỂ THẤY SỰ THAY ĐỔI
+                loadRecentSongs();
+
+                // 4. TODO: Chuyển sang PlayMusicActivity (Sau này làm)
+                // Intent intent = new Intent(getContext(), PlayMusicActivity.class);
+                // intent.putExtra("song_data", song);
+                // startActivity(intent);
             }
         });
 
@@ -157,7 +178,7 @@ public class HomeFragment extends Fragment {
         rv.setAdapter(adapter);
     }
 
-    // --- ARTISTS & CATEGORIES (Giữ nguyên) ---
+    // --- CÁC HÀM KHÁC (Giữ nguyên) ---
     private void setupArtists() {
         apiService.getAllArtists().enqueue(new Callback<List<Artist>>() {
             @Override
@@ -175,9 +196,7 @@ public class HomeFragment extends Fragment {
                 }
             }
             @Override
-            public void onFailure(Call<List<Artist>> call, Throwable t) {
-                Log.e("API_ARTIST", "Lỗi: " + t.getMessage());
-            }
+            public void onFailure(Call<List<Artist>> call, Throwable t) { Log.e("API_ARTIST", "Lỗi: " + t.getMessage()); }
         });
     }
 
@@ -198,9 +217,7 @@ public class HomeFragment extends Fragment {
                 }
             }
             @Override
-            public void onFailure(Call<List<Category>> call, Throwable t) {
-                Log.e("API_CATEGORY", "Lỗi: " + t.getMessage());
-            }
+            public void onFailure(Call<List<Category>> call, Throwable t) { Log.e("API_CATEGORY", "Lỗi: " + t.getMessage()); }
         });
     }
 }

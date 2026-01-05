@@ -76,7 +76,7 @@ public class Song implements Serializable {
     public Category getCategory() { return category; }
     public void setCategory(Category category) { this.category = category; }
 
-    // 👇 Getter & Setter cho Views
+    //  Getter & Setter cho Views
     public int getViews() { return views; }
     public void setViews(int views) { this.views = views; }
 }
