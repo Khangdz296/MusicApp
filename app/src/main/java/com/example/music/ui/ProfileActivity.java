@@ -1,6 +1,8 @@
 package com.example.music.ui;
 
+import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -8,32 +10,53 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.example.music.R;
+import com.example.music.api.ApiService;
+
+import com.example.music.api.RetrofitClient;
+import com.example.music.model.ProfileResponse;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ProfileActivity extends AppCompatActivity {
 
     private static final String TAG = "ProfileActivity";
 
-    ImageButton btnBack;
+    ImageButton btnBack, btnEditAvatar;
     EditText edtFirstName, edtLastName, edtUsername, edtEmail;
     Button btnChangePassword;
 
-    // Dữ liệu nhận từ MenuActivity
-    private Long userId;
-    private String username;
-    private String email;
-    private String fullName;
+    ApiService apiService;
+    SharedPreferences sharedPreferences;
+
+    String sessionKey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.layout_profile_huy); // ✅ PHẢI DÙNG layout_profile_huy
+        setContentView(R.layout.layout_profile_huy);
+
+        apiService = RetrofitClient.getClient().create(ApiService.class);
+        sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+
+        sessionKey = sharedPreferences.getString("session_key", "");
+
+        if (sessionKey.isEmpty()) {
+            Toast.makeText(this, "Phiên đăng nhập hết hạn", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
         initViews();
-        loadDataFromIntent();
-        setupListeners();
+        loadProfile();
+
+        btnBack.setOnClickListener(v -> finish());
+        btnChangePassword.setOnClickListener(v -> {
+            Intent intent = new Intent(ProfileActivity.this, ChangePasswordActivity.class);
+            startActivity(intent);
+        });
     }
 
     private void initViews() {
@@ -45,63 +68,90 @@ public class ProfileActivity extends AppCompatActivity {
         btnChangePassword = findViewById(R.id.btnChangePassword);
     }
 
-    private void loadDataFromIntent() {
-        Intent intent = getIntent();
-        if (intent != null) {
-            userId = intent.getLongExtra("user_id", 0L);
-            username = intent.getStringExtra("username");
-            email = intent.getStringExtra("email");
-            fullName = intent.getStringExtra("full_name");
+    private void loadProfile() {
+        Log.d(TAG, "Loading profile with session: " + sessionKey);
 
-            Log.d(TAG, "📥 Nhận dữ liệu từ MenuActivity:");
-            Log.d(TAG, "User ID: " + userId);
-            Log.d(TAG, "Username: " + username);
-            Log.d(TAG, "Email: " + email);
-            Log.d(TAG, "Full Name: " + fullName);
+        apiService.getProfile(sessionKey).enqueue(new Callback<ProfileResponse>() {
+            @Override
+            public void onResponse(Call<ProfileResponse> call, Response<ProfileResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    ProfileResponse profileResponse = response.body();
 
-            // Hiển thị dữ liệu lên UI
-            displayUserData();
-        } else {
-            Log.e(TAG, "❌ Không nhận được Intent data");
-            Toast.makeText(this, "Lỗi: Không có dữ liệu", Toast.LENGTH_SHORT).show();
-            finish();
-        }
-    }
+                    if ("success".equals(profileResponse.getStatus())) {
+                        ProfileResponse.UserData user = profileResponse.getUser();
 
-    private void displayUserData() {
-        // Tách full name thành first name và last name
-        if (fullName != null && !fullName.isEmpty()) {
-            String[] nameParts = fullName.split(" ", 2);
-            if (nameParts.length == 2) {
-                edtFirstName.setText(nameParts[0]);
-                edtLastName.setText(nameParts[1]);
-            } else {
-                edtFirstName.setText(fullName);
-                edtLastName.setText("");
+                        Log.d(TAG, "✅ Profile loaded");
+                        Log.d(TAG, "Username: " + user.getUsername());
+                        Log.d(TAG, "Email: " + user.getEmail());
+                        Log.d(TAG, "Full Name: " + user.getFull_name());
+
+                        displayProfile(user);
+
+                    } else {
+                        Log.e(TAG, "❌ Status not success");
+                        Toast.makeText(ProfileActivity.this,
+                                "Không thể tải thông tin", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Log.e(TAG, "❌ Response failed: " + response.code());
+
+                    if (response.code() == 403) {
+                        Toast.makeText(ProfileActivity.this,
+                                "Phiên đăng nhập hết hạn", Toast.LENGTH_SHORT).show();
+                        logout();
+                    } else {
+                        Toast.makeText(ProfileActivity.this,
+                                "Lỗi tải profile: " + response.code(), Toast.LENGTH_SHORT).show();
+                    }
+                }
             }
-        } else {
-            // Nếu không có full name, dùng username
-            edtFirstName.setText(username);
-            edtLastName.setText("");
-        }
 
-        // Hiển thị username và email
-        edtUsername.setText(username);
-        edtEmail.setText(email);
-
-        Log.d(TAG, "✅ Đã hiển thị dữ liệu lên UI");
+            @Override
+            public void onFailure(Call<ProfileResponse> call, Throwable t) {
+                Log.e(TAG, "❌ Network error: " + t.getMessage());
+                t.printStackTrace();
+                Toast.makeText(ProfileActivity.this,
+                        "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
-    private void setupListeners() {
-        // Nút Back - Quay lại MenuActivity
-        btnBack.setOnClickListener(v -> {
-            Log.d(TAG, "🔙 Back button clicked");
-            finish(); // Đóng ProfileActivity và quay về MenuActivity
-        });
+    private void displayProfile(ProfileResponse.UserData user) {
+        String fullName = user.getFull_name() != null ? user.getFull_name() : "";
+        String[] nameParts = splitName(fullName);
 
-        // Nút Change Password
-        btnChangePassword.setOnClickListener(v -> {
-            Toast.makeText(this, "Change Password đang phát triển", Toast.LENGTH_SHORT).show();
-        });
+        edtFirstName.setText(nameParts[0]);
+        edtLastName.setText(nameParts[1]);
+        edtUsername.setText(user.getUsername());
+        edtEmail.setText(user.getEmail());
+
+        edtUsername.setEnabled(false);
+        edtEmail.setEnabled(false);
+    }
+
+    private String[] splitName(String fullName) {
+        if (fullName == null || fullName.trim().isEmpty()) {
+            return new String[]{"", ""};
+        }
+
+        String[] parts = fullName.trim().split("\\s+", 2);
+        if (parts.length == 2) {
+            return parts;
+        } else if (parts.length == 1) {
+            return new String[]{parts[0], ""};
+        } else {
+            return new String[]{"", ""};
+        }
+    }
+
+    private void logout() {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear();
+        editor.apply();
+
+        Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 }
