@@ -144,10 +144,10 @@ public class MenuActivity extends AppCompatActivity {
             Toast.makeText(this, "Downloads đang phát triển", Toast.LENGTH_SHORT).show();
         });
 
-        menuEditProfile.setOnClickListener(v -> {
-            // ✅ TRUYỀN DỮ LIỆU QUA PROFILEACTIVITY
-            navigateToProfileActivity();
-        });
+//        menuEditProfile.setOnClickListener(v -> {
+//            // ✅ TRUYỀN DỮ LIỆU QUA PROFILEACTIVITY
+//            navigateToProfileActivity();
+//        });
 
 //        menuProfile.setOnClickListener(v -> {
 //            // ✅ TRUYỀN DỮ LIỆU QUA PROFILEACTIVITY
@@ -165,32 +165,32 @@ public class MenuActivity extends AppCompatActivity {
         menuLogout.setOnClickListener(v -> showLogoutDialog());
     }
 
-    // ✅ HÀM MỚI - TRUYỀN DỮ LIỆU QUA INTENT
-    private void navigateToProfileActivity() {
-        if (currentUser != null) {
-            Intent intent = new Intent(MenuActivity.this, ProfileActivity.class);
-
-            // Truyền dữ liệu qua Intent
-            intent.putExtra("user_id", currentUser.getUser_id());
-            intent.putExtra("username", currentUser.getUsername());
-            intent.putExtra("email", currentUser.getEmail());
-            intent.putExtra("full_name", currentUser.getFull_name());
-
-            Log.d(TAG, "✅ Chuyển sang ProfileActivity với dữ liệu:");
-            Log.d(TAG, "User ID: " + currentUser.getUser_id());
-            Log.d(TAG, "Username: " + currentUser.getUsername());
-            Log.d(TAG, "Email: " + currentUser.getEmail());
-            Log.d(TAG, "Full Name: " + currentUser.getFull_name());
-
-            startActivity(intent);
-        } else {
-            Toast.makeText(this,
-                    "Vui lòng đợi load thông tin profile",
-                    Toast.LENGTH_SHORT).show();
-
-            Log.w(TAG, "⚠️ currentUser is null, chưa load xong API");
-        }
-    }
+//    // ✅ HÀM MỚI - TRUYỀN DỮ LIỆU QUA INTENT
+//    private void navigateToProfileActivity() {
+//        if (currentUser != null) {
+//            Intent intent = new Intent(MenuActivity.this, ProfileActivity.class);
+//
+//            // Truyền dữ liệu qua Intent
+//            intent.putExtra("user_id", currentUser.getUser_id());
+//            intent.putExtra("username", currentUser.getUsername());
+//            intent.putExtra("email", currentUser.getEmail());
+//            intent.putExtra("full_name", currentUser.getFull_name());
+//
+//            Log.d(TAG, "✅ Chuyển sang ProfileActivity với dữ liệu:");
+//            Log.d(TAG, "User ID: " + currentUser.getUser_id());
+//            Log.d(TAG, "Username: " + currentUser.getUsername());
+//            Log.d(TAG, "Email: " + currentUser.getEmail());
+//            Log.d(TAG, "Full Name: " + currentUser.getFull_name());
+//
+//            startActivity(intent);
+//        } else {
+//            Toast.makeText(this,
+//                    "Vui lòng đợi load thông tin profile",
+//                    Toast.LENGTH_SHORT).show();
+//
+//            Log.w(TAG, "⚠️ currentUser is null, chưa load xong API");
+//        }
+//    }
 
     private void showLogoutDialog() {
         new AlertDialog.Builder(this)
