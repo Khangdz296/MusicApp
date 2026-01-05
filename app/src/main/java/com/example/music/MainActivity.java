@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.music.ui.HomeFragment;
 import com.example.music.ui.LibraryFragment;
+import com.example.music.ui.SearchFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 
@@ -43,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else if (id == R.id.nav_search) {
                     // Nếu chưa có SearchFragment, tạm thời load Home để test không bị lỗi
-                    selectedFragment = new HomeFragment();
+                    selectedFragment = new SearchFragment();
                     // selectedFragment = new SearchFragment();
                 }
                 else if (id == R.id.nav_library) {
