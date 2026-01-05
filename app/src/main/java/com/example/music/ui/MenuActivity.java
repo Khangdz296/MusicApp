@@ -28,7 +28,7 @@ public class MenuActivity extends AppCompatActivity {
     CircleImageView imgProfile;
     TextView txtUsername, txtEmail;
     ImageButton btnSettings;
-    LinearLayout menuFavourites, menuDownloads, menuEditProfile, menuProfile, menuPlaylist, menuLogout;
+    LinearLayout menuFavourites, menuDownloads, menuEditProfile, menuProfile, menuPlaylist, menuLogout, btnChangePassword;
 
     ApiService apiService;
     SharedPreferences sharedPreferences;
@@ -67,7 +67,7 @@ public class MenuActivity extends AppCompatActivity {
         menuFavourites = findViewById(R.id.menuFavourites);
         menuDownloads = findViewById(R.id.menuDownloads);
         menuEditProfile = findViewById(R.id.menuEditProfile);
-        menuProfile = findViewById(R.id.menuProfile);
+        btnChangePassword = findViewById(R.id.btnChangePassword);
         menuPlaylist = findViewById(R.id.menuPlaylist);
         menuLogout = findViewById(R.id.menuLogout);
     }
@@ -149,9 +149,13 @@ public class MenuActivity extends AppCompatActivity {
             navigateToProfileActivity();
         });
 
-        menuProfile.setOnClickListener(v -> {
-            // ✅ TRUYỀN DỮ LIỆU QUA PROFILEACTIVITY
-            navigateToProfileActivity();
+//        menuProfile.setOnClickListener(v -> {
+//            // ✅ TRUYỀN DỮ LIỆU QUA PROFILEACTIVITY
+//            navigateToProfileActivity();
+//        });
+        btnChangePassword.setOnClickListener(v -> {
+            Intent intent = new Intent(MenuActivity.this, ChangePasswordActivity.class);
+            startActivity(intent);
         });
 
         menuPlaylist.setOnClickListener(v -> {
