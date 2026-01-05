@@ -18,7 +18,7 @@
 
         <!-- LAUNCHER -->
         <activity
-            android:name=".ui.LoginActivity"
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -43,10 +43,13 @@
             android:exported="false" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.LoginActivity"
             android:exported="false" />
         <activity
             android:name=".ui.ChangePasswordActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.CategoryDetailActivity"
             android:exported="false" />
     </application>
 
