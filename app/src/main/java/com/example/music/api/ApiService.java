@@ -24,6 +24,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -92,4 +93,6 @@ public interface ApiService {
     // 3. Lấy toàn bộ bài hát (Dùng lại API cũ hoặc tạo mới nếu cần phân trang admin)
     @GET("api/songs")
     Call<List<Song>> getAllSongsAdmin();
+    @PUT("api/admin/songs/{id}")
+    Call<Song> updateSong(@Path("id") Long id, @Body Song song);
 }

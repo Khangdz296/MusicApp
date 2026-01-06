@@ -24,6 +24,7 @@ public class AdminSongAdapter extends RecyclerView.Adapter<AdminSongAdapter.Song
     // 1. Interface: Xử lý sự kiện XÓA
     public interface OnAdminActionListener {
         void onDeleteClick(Song song);
+        void onEditClick(Song song);
     }
 
     // 2. Constructor
@@ -65,9 +66,11 @@ public class AdminSongAdapter extends RecyclerView.Adapter<AdminSongAdapter.Song
         // --- XỬ LÝ SỰ KIỆN NÚT XÓA ---
         holder.btnDelete.setOnClickListener(v -> {
             if (listener != null) {
-                // Truyền bài hát cần xóa ra ngoài Activity
                 listener.onDeleteClick(song);
             }
+        });
+        holder.btnEdit.setOnClickListener(v -> {
+            if (listener != null) listener.onEditClick(song);
         });
     }
 
@@ -78,7 +81,7 @@ public class AdminSongAdapter extends RecyclerView.Adapter<AdminSongAdapter.Song
 
     public static class SongViewHolder extends RecyclerView.ViewHolder {
         TextView tvSongName, tvArtist;
-        ImageView imgAlbum, btnDelete; // Thay btnFavorite bằng btnDelete
+        ImageView imgAlbum, btnDelete, btnEdit; // Thay btnFavorite bằng btnDelete
 
         public SongViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -89,6 +92,7 @@ public class AdminSongAdapter extends RecyclerView.Adapter<AdminSongAdapter.Song
 
             // Đây là nút thùng rác
             btnDelete = itemView.findViewById(R.id.btnDelete);
+            btnEdit = itemView.findViewById(R.id.btnEdit);
         }
     }
 }
