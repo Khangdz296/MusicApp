@@ -121,4 +121,6 @@ public interface ApiService {
 
     @DELETE("api/admin/categories/{id}")
     Call<Void> deleteCategory(@Path("id") Long id);
+    @GET("api/albums/top-views")
+    Call<List<Album>> getTop50Albums();
 }
