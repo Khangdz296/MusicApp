@@ -46,6 +46,12 @@
         <activity
             android:name=".ui.CategoryDetailActivity"
             android:exported="false" />
+        <activity
+            android:name=".ui.PublicPlaylistActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.PublicPlaylistDetailActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

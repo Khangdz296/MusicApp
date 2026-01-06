@@ -86,6 +86,15 @@ public class SearchFragment extends Fragment {
                 // intent.putExtra("SONG_OBJECT", song);
                 // startActivity(intent);
             }
+            @Override
+            public void onAddToPlaylistClick(Song song) {
+                // Tạm thời log ra hoặc để trống nếu chưa làm Player
+                Log.d("SEARCH_CLICK", "Click bài trong Search: " + song.getTitle());
+            }
+            @Override
+            public void onFavoriteClick(Song song) {
+                Log.d("SEARCH_CLICK", "Click favorite trong Search: " + song.getTitle());
+            }
         });
         rcvSearchResults.setAdapter(songAdapter);
 

@@ -1,6 +1,7 @@
 package com.example.music.api;
 
 import com.example.music.model.Album;
+import com.example.music.model.ApiResponse;
 import com.example.music.model.Artist;
 import com.example.music.model.Category;
 import com.example.music.model.ChangePasswordResponse;
@@ -79,4 +80,60 @@ public interface ApiService {
 
     @GET("api/albums")
     Call<List<Album>> getAllAlbums();
+
+    /**
+     * 1. Lấy danh sách Public Playlists (Mục 2.7)
+     * GET /api/playlists/public
+     */
+    @GET("playlists/public")
+    Call<List<Playlist>> getPublicPlaylists();
+
+
+    /**
+     * 3. Lấy chi tiết Playlist
+     * GET /api/playlists/{id}
+     */
+    @GET("playlists/{id}")
+    Call<Playlist> getPlaylistDetail(@Path("id") Long playlistId);
+
+    /**
+     * 4. Thêm bài hát vào Playlist (Mục 2.5)
+     * POST /api/playlists/{playlistId}/add-song/{songId}
+     */
+    @POST("playlists/{playlistId}/add-song/{songId}")
+    Call<String> addSongToPlaylist(
+            @Path("playlistId") Long playlistId,
+            @Path("songId") Long songId
+    );
+
+    /**
+     * 5. Tạo Playlist mới
+     * POST /api/playlists
+     */
+    @POST("playlists")
+    Call<Playlist> createPlaylist(@Body Playlist playlist);
+
+
+    // ==================== SONG APIs ====================
+
+    /**
+     * 6. Toggle Favorite (Mục 2.6)
+     * POST /api/songs/{songId}/favorite
+     * Backend cần implement API này
+     */
+    @POST("songs/{songId}/favorite")
+    Call<ApiResponse> toggleFavorite(
+            @Path("songId") Long songId,
+            @Query("userId") Long userId
+    );
+
+    /**
+     * 7. Lấy danh sách bài hát yêu thích (Mục 2.6)
+     * GET /api/songs/favorites/{userId}
+     * Backend cần implement API này
+     */
+    @GET("songs/favorites/{userId}")
+    Call<List<Song>> getFavoriteSongs(@Path("userId") Long userId);
+
+
 }

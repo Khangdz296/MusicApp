@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -13,6 +14,7 @@ import com.bumptech.glide.Glide;
 import com.example.music.R;
 import com.example.music.model.Song;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SongAdapterK extends RecyclerView.Adapter<SongAdapterK.SongViewHolder> {
@@ -24,6 +26,8 @@ public class SongAdapterK extends RecyclerView.Adapter<SongAdapterK.SongViewHold
     // 2. Tạo Interface để hứng sự kiện click
     public interface OnSongClickListener {
         void onSongClick(Song song);
+        void onAddToPlaylistClick(Song song);
+        void onFavoriteClick(Song song);
     }
 
     // 3. Cập nhật Constructor để nhận thêm Listener
@@ -40,7 +44,10 @@ public class SongAdapterK extends RecyclerView.Adapter<SongAdapterK.SongViewHold
         this.list = newList;
         notifyDataSetChanged();
     }
-
+    public void setSongs(List<Song> songs) {
+        this.list = songs;
+        notifyDataSetChanged();
+    }
     @NonNull
     @Override
     public SongViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -68,6 +75,16 @@ public class SongAdapterK extends RecyclerView.Adapter<SongAdapterK.SongViewHold
                 listener.onSongClick(song); // Truyền bài hát ra ngoài
             }
         });
+        holder.btnAddToPlaylist.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onAddToPlaylistClick(song);
+            }
+        });
+        holder.btnFavorite.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onFavoriteClick(song);
+            }
+        });
         // -------------------------------------
     }
 
@@ -79,7 +96,7 @@ public class SongAdapterK extends RecyclerView.Adapter<SongAdapterK.SongViewHold
     public static class SongViewHolder extends RecyclerView.ViewHolder {
         TextView tvSongName, tvArtist;
         ImageView imgAlbum, btnFavorite, btnAddToPlaylist;
-
+        LinearLayout layoutSongInfo;
         public SongViewHolder(@NonNull View itemView) {
             super(itemView);
             imgAlbum = itemView.findViewById(R.id.imgAlbum);
@@ -87,6 +104,9 @@ public class SongAdapterK extends RecyclerView.Adapter<SongAdapterK.SongViewHold
             tvArtist = itemView.findViewById(R.id.tvArtist);
             btnFavorite = itemView.findViewById(R.id.btnFavorite);
             btnAddToPlaylist = itemView.findViewById(R.id.btnAddToPlaylist);
+            layoutSongInfo = itemView.findViewById(R.id.layoutSongInfo);
         }
+
     }
+
 }
