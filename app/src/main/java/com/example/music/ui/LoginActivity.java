@@ -1,6 +1,5 @@
 package com.example.music.ui;
 
-
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -14,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.music.MainActivity;
 import com.example.music.R;
+import com.example.music.admin.AdminActivity;
 import com.example.music.api.ApiService;
 import com.example.music.api.RetrofitClient;
 import com.example.music.model.LoginRequest;
@@ -46,7 +46,7 @@ public class LoginActivity extends AppCompatActivity {
         sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
 
         if (isLoggedIn()) {
-            navigateToHome();
+            navigateBasedOnRole(); // Điều hướng theo role
             return;
         }
 
@@ -93,17 +93,19 @@ public class LoginActivity extends AppCompatActivity {
                         Log.d(TAG, "LOGIN SUCCESS");
                         Log.d(TAG, "User ID: " + loginResponse.getUser_id());
                         Log.d(TAG, "Session Key: " + loginResponse.getSession_key());
+                        Log.d(TAG, "Role: " + loginResponse.getRole());
 
                         saveLoginSession(
                                 loginResponse.getUser_id(),
                                 loginResponse.getSession_key(),
-                                username
+                                username,
+                                loginResponse.getRole() // Lưu role
                         );
 
                         Toast.makeText(LoginActivity.this,
                                 "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
 
-                        navigateToHome();
+                        navigateBasedOnRole(); // Điều hướng theo role
                         finish();
 
                     } else {
@@ -151,11 +153,12 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void saveLoginSession(Long userId, String sessionKey, String username) {
+    private void saveLoginSession(Long userId, String sessionKey, String username, String role) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putLong("user_id", userId);
         editor.putString("session_key", sessionKey);
         editor.putString("username", username);
+        editor.putString("role", role); // Lưu role
         editor.putBoolean("is_logged_in", true);
         editor.apply();
 
@@ -166,8 +169,20 @@ public class LoginActivity extends AppCompatActivity {
         return sharedPreferences.getBoolean("is_logged_in", false);
     }
 
-    private void navigateToHome() {
-        Intent intent = new Intent(LoginActivity.this, MenuActivity.class); // Thay MainActivity → ProfileActivity
+    private void navigateBasedOnRole() {
+        String role = sharedPreferences.getString("role", "USER");
+
+        Intent intent;
+        if ("ADMIN".equalsIgnoreCase(role)) {
+            // Nếu là admin, chuyển sang AdminActivity
+            intent = new Intent(LoginActivity.this, AdminActivity.class);
+            Log.d(TAG, "Navigating to AdminActivity");
+        } else {
+            // Nếu là user thường, chuyển sang MenuActivity
+            intent = new Intent(LoginActivity.this, MenuActivity.class);
+            Log.d(TAG, "Navigating to MenuActivity");
+        }
+
         startActivity(intent);
         finish();
     }

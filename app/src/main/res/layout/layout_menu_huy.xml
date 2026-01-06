@@ -36,6 +36,17 @@
                 android:layout_height="wrap_content"
                 android:padding="16dp">
 
+                <!-- 👇 NÚT BACK - QUAY VỀ HOME -->
+                <ImageButton
+                    android:id="@+id/btnBackToHome"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_alignParentStart="true"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/down"
+                    app:tint="#FFFFFF"
+                    android:contentDescription="Back to Home"/>
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -198,7 +209,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Change passowrd"
+                    android:text="Change password"
                     android:textColor="#1DB954"
                     android:textSize="16sp"
                     android:layout_marginStart="16dp"/>
