@@ -56,6 +56,14 @@
             android:exported="false" />
 
         <activity
+            android:name=".ui.ChartDetailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.ArtistDetailActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ui.PlayMusicActivity"
             android:exported="false"
             android:screenOrientation="portrait" />

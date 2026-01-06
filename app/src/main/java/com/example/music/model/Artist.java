@@ -1,28 +1,37 @@
 package com.example.music.model;
 
+import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 
 public class Artist implements Serializable {
-    // SỬA QUAN TRỌNG: Đổi String thành Long
+
+    @SerializedName("id")
     private Long id;
 
+    @SerializedName("name")
     private String name;
+
+    @SerializedName("imageUrl")
     private String imageUrl;
 
-    // 1. Constructor rỗng (Bắt buộc để Retrofit/Gson hoạt động tốt)
+    // 👇 THÊM TRƯỜNG MÔ TẢ (Biography)
+    @SerializedName("description")
+    private String description;
+
+    // 1. Constructor rỗng
     public Artist() {
     }
 
-    // 2. Constructor đầy đủ (Cập nhật tham số id thành Long)
-    public Artist(Long id, String name, String imageUrl) {
+    // 2. Constructor đầy đủ
+    public Artist(Long id, String name, String imageUrl, String description) {
         this.id = id;
         this.name = name;
         this.imageUrl = imageUrl;
+        this.description = description;
     }
 
     // --- Getters và Setters ---
 
-    // Nhớ sửa kiểu trả về và tham số là Long
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -31,4 +40,8 @@ public class Artist implements Serializable {
 
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    // 👇 Getter và Setter cho Description
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 }

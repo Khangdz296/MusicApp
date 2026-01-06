@@ -52,8 +52,11 @@ public class AlbumDetailActivity extends AppCompatActivity {
             tvName.setText(album.getName());
 
             // Check null cho an toàn
-            String artist = album.getArtistName() != null ? album.getArtistName() : "Unknown Artist";
-            tvArtist.setText(artist);
+            if (album.getArtist() != null) {
+                tvArtist.setText(album.getArtist().getName());
+            } else {
+                tvArtist.setText("Unknown Artist");
+            }
 
             Glide.with(this)
                     .load(album.getImageUrl())

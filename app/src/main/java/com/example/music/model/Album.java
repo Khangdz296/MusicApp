@@ -12,8 +12,8 @@ public class Album implements Serializable {
     @SerializedName("name")
     private String name;
 
-    @SerializedName("artistName")
-    private String artistName;
+    @SerializedName("artist")
+    private Artist artist;
 
     @SerializedName("imageUrl")
     private String imageUrl;
@@ -21,10 +21,10 @@ public class Album implements Serializable {
     @SerializedName("songs")
     private List<Song> songs;
 
-    public Album(Long id, String name, String artistName, String imageUrl, List<Song> songs) {
+    public Album(Long id, String name, Artist artist, String imageUrl, List<Song> songs) {
         this.id = id;
         this.name = name;
-        this.artistName = artistName;
+        this.artist = artist;
         this.imageUrl = imageUrl;
         this.songs = songs;
     }
@@ -32,10 +32,11 @@ public class Album implements Serializable {
     // Getters
     public Long getId() { return id; }
     public String getName() { return name; }
-    public String getArtistName() { return artistName; }
     public String getImageUrl() { return imageUrl; }
 
     // 👇 Getter mới
     public List<Song> getSongs() { return songs; }
     public void setSongs(List<Song> songs) { this.songs = songs; }
+    public Artist getArtist() { return artist; }
+    public void setArtist(Artist artist) { this.artist = artist; }
 }
