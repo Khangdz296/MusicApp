@@ -24,6 +24,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -99,4 +100,6 @@ public interface ApiService {
     // ✅ THÊM MỚI: API lấy danh sách Album của 1 nghệ sĩ (Để hiện thêm phần Album)
     @GET("api/artists/{id}/albums")
     Call<List<Album>> getAlbumsByArtistId(@Path("id") Long id);
+    @PUT("api/admin/songs/{id}")
+    Call<Song> updateSong(@Path("id") Long id, @Body Song song);
 }

@@ -1,5 +1,6 @@
 package com.example.music.admin;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
@@ -34,9 +35,19 @@ public class AdminSongManagerActivity extends AppCompatActivity {
         rcvAdminSongs.setLayoutManager(new LinearLayoutManager(this));
         apiService = RetrofitClient.getClient().create(ApiService.class);
 
-        adapter = new AdminSongAdapter(this, new ArrayList<>(), song -> {
-            // Khi bấm nút xóa -> Hiện dialog xác nhận
-            confirmDelete(song);
+        adapter = new AdminSongAdapter(this, new ArrayList<>(), new AdminSongAdapter.OnAdminActionListener() {
+            @Override
+            public void onDeleteClick(Song song) {
+                confirmDelete(song);
+            }
+
+            @Override
+            public void onEditClick(Song song) {
+                // Chuyển sang màn hình Add nhưng mang theo dữ liệu -> Chế độ Sửa
+                Intent intent = new Intent(AdminSongManagerActivity.this, AdminAddSongActivity.class);
+                intent.putExtra("SONG_DATA", song); // Song phải implements Serializable
+                startActivity(intent);
+            }
         });
         rcvAdminSongs.setAdapter(adapter);
 
