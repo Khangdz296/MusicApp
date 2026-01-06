@@ -2,6 +2,7 @@ package com.example.music.model;
 
 import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Playlist implements Serializable {
@@ -14,31 +15,39 @@ public class Playlist implements Serializable {
     @SerializedName("imageUrl")
     private String imageUrl;
 
-    @SerializedName("is_public")
-    private boolean isPublic;
-
-    // 👇 QUAN TRỌNG: Backend trả về object "user", nên ở đây phải là User type
     @SerializedName("user")
     private User user;
 
     @SerializedName("songs")
     private List<Song> songs;
 
-    // Constructor
-    public Playlist(Long id, String name, User user, String imageUrl) {
-        this.id = id;
+    // Constructor rỗng (Bắt buộc để Gson hoạt động ổn định)
+    public Playlist() {
+    }
+
+    // Constructor để tạo mới nhanh
+    public Playlist(String name, String imageUrl) {
         this.name = name;
-        this.user = user;
         this.imageUrl = imageUrl;
     }
 
     // Getter & Setter
     public Long getId() { return id; }
-    public String getName() { return name; }
-    public String getImageUrl() { return imageUrl; }
+    public void setId(Long id) { this.id = id; }
 
-    public User getUser() { return user; } // Lấy User ra để hiển thị tên
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
 
-    public List<Song> getSongs() { return songs; }
+    // Xử lý list song để tránh NullPointerException
+    public List<Song> getSongs() {
+        if (songs == null) songs = new ArrayList<>();
+        return songs;
+    }
+    public void setSongs(List<Song> songs) { this.songs = songs; }
 }

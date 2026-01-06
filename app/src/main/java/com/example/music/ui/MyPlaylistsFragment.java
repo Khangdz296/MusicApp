@@ -1,5 +1,6 @@
 package com.example.music.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -45,8 +46,12 @@ public class MyPlaylistsFragment extends Fragment {
         // 2. Setup Adapter rỗng trước
         playlistList = new ArrayList<>();
         adapter = new LibraryPlaylistAdapter(getContext(), playlistList, playlist -> {
-            Toast.makeText(getContext(), "Mở Playlist: " + playlist.getName(), Toast.LENGTH_SHORT).show();
-            // TODO: Code mở chi tiết playlist sau
+            // KHI CLICK VÀO PLAYLIST -> CHUYỂN SANG TRANG DETAIL
+            Intent intent = new Intent(getContext(), PlaylistDetailActivity.class);
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("object_playlist", playlist);
+            intent.putExtras(bundle);
+            startActivity(intent);
         });
         recyclerView.setAdapter(adapter);
 
@@ -66,9 +71,7 @@ public class MyPlaylistsFragment extends Fragment {
             @Override
             public void onResponse(Call<List<Playlist>> call, Response<List<Playlist>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    playlistList.clear();
-                    playlistList.addAll(response.body());
-                    adapter.notifyDataSetChanged(); // Cập nhật list
+                    adapter.setData(response.body()); // Cập nhật list
                 }
             }
 

@@ -52,8 +52,8 @@ public class LibraryPlaylistAdapter extends RecyclerView.Adapter<LibraryPlaylist
         String ownerName = "Unknown";
         if (playlist.getUser() != null) {
             // Kiểm tra null để tránh lỗi crash
-            if (playlist.getUser().getUsername() != null) {
-                ownerName = playlist.getUser().getUsername();
+            if (playlist.getUser().getFullName() != null) {
+                ownerName = playlist.getUser().getFullName();
             }
         }
         holder.tvSubtitle.setText("Playlist • " + ownerName);
@@ -87,5 +87,9 @@ public class LibraryPlaylistAdapter extends RecyclerView.Adapter<LibraryPlaylist
             tvTitle = itemView.findViewById(R.id.tvTitle);
             tvSubtitle = itemView.findViewById(R.id.tvSubtitle);
         }
+    }
+    public void setData(List<Playlist> newPlaylists) {
+        this.playlists = newPlaylists;
+        notifyDataSetChanged(); // Lệnh này bắt buộc để giao diện vẽ lại
     }
 }
