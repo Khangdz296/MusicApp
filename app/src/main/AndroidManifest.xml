@@ -73,6 +73,14 @@
             android:exported="false" />
         <activity android:name=".admin.AdminSongManagerActivity"
             android:exported="false" />
+        <activity android:name=".admin.AdminCategoryManagerActivity"
+            android:exported="false" />
+        <activity android:name=".admin.AdminAddCategoryActivity"
+            android:exported="false" />
+        <activity android:name=".admin.AdminArtistManagerActivity"
+            android:exported="false" />
+        <activity android:name=".admin.AdminAddArtistActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
