@@ -37,6 +37,11 @@
         <activity
             android:name=".ui.MenuActivity"
             android:exported="false" />
+
+<!--        <activity-->
+<!--            android:name=".ui.ProfileActivity"-->
+<!--            android:exported="false" />-->
+
         <activity
             android:name=".ui.LoginActivity"
             android:exported="false" />
@@ -46,9 +51,10 @@
         <activity
             android:name=".ui.CategoryDetailActivity"
             android:exported="false" />
-
-        <activity android:name=".ui.AlbumDetailActivity"
-            android:exported="false" />
+        <activity
+            android:name=".ui.PlayMusicActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>
