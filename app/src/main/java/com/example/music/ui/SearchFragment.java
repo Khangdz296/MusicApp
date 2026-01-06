@@ -27,6 +27,7 @@ import com.example.music.adapter.SongAdapterK;
 import com.example.music.api.RetrofitClient;
 import com.example.music.model.Category;
 import com.example.music.model.Song;
+import com.example.music.utils.MiniPlayerManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,15 +43,22 @@ public class SearchFragment extends Fragment {
     private EditText edtSearch;
     private CategoryAdapterK categoryAdapter;
     private SongAdapterK songAdapter;
+    private MiniPlayerManager miniPlayerManager;
+
+    // Lưu danh sách kết quả tìm kiếm
+    private List<Song> searchResultList = new ArrayList<>();
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_search_khang, container, false);
 
+        // Khởi tạo MiniPlayerManager
+        miniPlayerManager = MiniPlayerManager.getInstance();
+
         // 1. Ánh xạ View
         rcvCategories = view.findViewById(R.id.rcvCategories);
-        rcvSearchResults = view.findViewById(R.id.rcvSearchResults); // ID mới thêm trong XML
+        rcvSearchResults = view.findViewById(R.id.rcvSearchResults);
         tvSubHeader = view.findViewById(R.id.tvSubHeader);
         edtSearch = view.findViewById(R.id.edtSearch);
 
@@ -72,19 +80,26 @@ public class SearchFragment extends Fragment {
         // 3. Cài đặt Search Result Adapter
         rcvSearchResults.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Thêm tham số thứ 3 là Listener
+        // Khi click vào bài hát từ kết quả tìm kiếm
         songAdapter = new SongAdapterK(getContext(), new ArrayList<>(), new SongAdapterK.OnSongClickListener() {
             @Override
             public void onSongClick(Song song) {
-                // --- IN LOG RA MÀN HÌNH ---
+                // Tìm vị trí của bài hát trong danh sách
+                int position = findSongPosition(song);
+
                 Log.d("SEARCH_CLICK", "Người dùng đã chọn bài: " + song.getTitle());
                 Log.d("SEARCH_CLICK", "ID bài hát: " + song.getId());
-                Log.d("SEARCH_CLICK", "Link nhạc: " + song.getFileUrl());
+                Log.d("SEARCH_CLICK", "Vị trí: " + position);
 
-                // Sau này sẽ code chuyển màn hình PlayerActivity ở đây
-                // Intent intent = new Intent(getContext(), PlayerActivity.class);
-                // intent.putExtra("SONG_OBJECT", song);
-                // startActivity(intent);
+                // Phát nhạc qua MiniPlayerManager
+                miniPlayerManager.playSong(song, searchResultList, position);
+
+                // Chuyển sang màn hình PlayMusicActivity
+                Intent intent = new Intent(getContext(), PlayMusicActivity.class);
+                intent.putExtra("song_data", song);
+                intent.putExtra("song_list", new ArrayList<>(searchResultList));
+                intent.putExtra("current_position", position);
+                startActivity(intent);
             }
         });
         rcvSearchResults.setAdapter(songAdapter);
@@ -108,6 +123,8 @@ public class SearchFragment extends Fragment {
                     performSearch(keyword);
                 } else {
                     showSearchMode(false);
+                    // Xóa danh sách kết quả khi không còn tìm kiếm
+                    searchResultList.clear();
                 }
             }
         });
@@ -136,12 +153,19 @@ public class SearchFragment extends Fragment {
             @Override
             public void onResponse(Call<List<Song>> call, Response<List<Song>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    songAdapter.updateData(response.body());
+                    // Lưu danh sách kết quả tìm kiếm
+                    searchResultList = new ArrayList<>(response.body());
+
+                    // Cập nhật adapter
+                    songAdapter.updateData(searchResultList);
+
+                    Log.d("SEARCH_RESULT", "Tìm thấy " + searchResultList.size() + " bài hát");
                 }
             }
             @Override
             public void onFailure(Call<List<Song>> call, Throwable t) {
-                // Xử lý lỗi
+                Log.e("API_ERROR", "Lỗi tìm kiếm: " + t.getMessage());
+                Toast.makeText(getContext(), "Lỗi tìm kiếm", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -156,5 +180,21 @@ public class SearchFragment extends Fragment {
             tvSubHeader.setVisibility(View.VISIBLE);
             rcvSearchResults.setVisibility(View.GONE);
         }
+    }
+
+    /**
+     * Tìm vị trí của bài hát trong danh sách kết quả tìm kiếm
+     */
+    private int findSongPosition(Song song) {
+        if (song == null || searchResultList.isEmpty()) {
+            return 0;
+        }
+
+        for (int i = 0; i < searchResultList.size(); i++) {
+            if (searchResultList.get(i).getId() == song.getId()) {
+                return i;
+            }
+        }
+        return 0;
     }
 }
