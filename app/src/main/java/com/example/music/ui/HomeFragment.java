@@ -6,8 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView; // Import ImageView cho nút Settings
-import android.widget.TextView;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -19,13 +18,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.music.R;
 import com.example.music.adapter.ArtistAdapter;
 import com.example.music.adapter.CategoryAdapterK;
-import com.example.music.adapter.ChartAdapter; // 👇 1. IMPORT QUAN TRỌNG: Adapter thẻ BXH
+import com.example.music.adapter.ChartAdapter;
 import com.example.music.adapter.SongAdapter;
 import com.example.music.api.ApiService;
 import com.example.music.api.RetrofitClient;
 import com.example.music.model.Artist;
 import com.example.music.model.Category;
 import com.example.music.model.Song;
+import com.example.music.utils.MiniPlayerManager;
 import com.example.music.utils.RecentSongManager;
 
 import java.util.List;
@@ -36,48 +36,39 @@ import retrofit2.Response;
 
 public class HomeFragment extends Fragment {
 
-    // Khai báo biến
-    private RecyclerView rvBanner; // rvHighlight
-    private RecyclerView rvNewReleases, rvCharts, rvRecentlyPlayed, rvArtists, rvCategories;
-    private ImageView icSettings; // Nút cài đặt
+    private RecyclerView rvBanner, rvNewReleases, rvCharts, rvRecentlyPlayed, rvArtists, rvCategories;
+    private ImageView icSettings;
     private ApiService apiService;
+    private MiniPlayerManager miniPlayerManager;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home_hoang, container, false);
 
-        // 1. ÁNH XẠ VIEW
+        // Khởi tạo Mini Player Manager
+        miniPlayerManager = MiniPlayerManager.getInstance();
+
         rvBanner = view.findViewById(R.id.rvHighlight);
         rvNewReleases = view.findViewById(R.id.rvNewReleases);
         rvCharts = view.findViewById(R.id.rvCharts);
         rvRecentlyPlayed = view.findViewById(R.id.rvRecentlyPlayed);
         rvArtists = view.findViewById(R.id.rvArtists);
         rvCategories = view.findViewById(R.id.rvCategories);
-
-        // Ánh xạ nút cài đặt
         icSettings = view.findViewById(R.id.icSettings);
 
-        // 2. XỬ LÝ SỰ KIỆN CLICK
-        // Bấm settings -> Chuyển qua Profile
         icSettings.setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), MenuActivity.class);
             startActivity(intent);
         });
 
-        // 3. KHỞI TẠO API
         apiService = RetrofitClient.getClient().create(ApiService.class);
 
-        // 4. GỌI DỮ LIỆU TỪ SERVER
-        fetchRandomSongsForHighlight(); // Random (Banner)
-        fetchNewSongs();                // Nhạc mới (List ngang)
-        setupArtists();                 // Nghệ sĩ
-        setupCategories();              // Thể loại
-
-        // 👇 5. SỬA QUAN TRỌNG: Dùng hàm setup thẻ tĩnh CHỨ KHÔNG gọi API fetchCharts() nữa
+        fetchRandomSongsForHighlight();
+        fetchNewSongs();
+        setupArtists();
+        setupCategories();
         setupFixedCharts();
-
-        // 6. LOAD LỊCH SỬ NGHE
         loadRecentSongs();
 
         return view;
@@ -86,23 +77,17 @@ public class HomeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        // Cập nhật lại lịch sử khi quay lại màn hình này
         loadRecentSongs();
     }
 
-    // --- 1. SETUP BXH TĨNH (ChartAdapter - 2 Thẻ Card) ---
     private void setupFixedCharts() {
         if (getContext() == null) return;
-
-        // Dùng ChartAdapter để hiển thị 2 thẻ: MOST VIEWED & NEW RELEASES
         ChartAdapter chartAdapter = new ChartAdapter();
-
         rvCharts.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         rvCharts.setAdapter(chartAdapter);
         rvCharts.setVisibility(View.VISIBLE);
     }
 
-    // --- 2. LOGIC LOAD LỊCH SỬ TỪ MÁY ---
     private void loadRecentSongs() {
         if (getContext() == null) return;
         List<Song> recentList = RecentSongManager.getRecentSongs(getContext());
@@ -114,7 +99,6 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    // --- 3. LOGIC RANDOM SONGS (Banner - Hôm nay nghe gì) ---
     private void fetchRandomSongsForHighlight() {
         apiService.getRandomSongs().enqueue(new Callback<List<Song>>() {
             @Override
@@ -131,7 +115,6 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    // --- 4. LOGIC NHẠC MỚI (List ngang bên dưới banner) ---
     private void fetchNewSongs() {
         apiService.getNewSongs().enqueue(new Callback<List<Song>>() {
             @Override
@@ -147,7 +130,6 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    // --- HÀM CHUNG SETUP ADAPTER BÀI HÁT ---
     private void setupSection(RecyclerView rv, List<Song> data, int type) {
         if (getContext() == null || data == null || data.isEmpty()) {
             rv.setVisibility(View.GONE);
@@ -158,11 +140,17 @@ public class HomeFragment extends Fragment {
         SongAdapter adapter = new SongAdapter(data, type, new SongAdapter.OnSongClickListener() {
             @Override
             public void onSongClick(Song song) {
+                // Lưu vào lịch sử
                 RecentSongManager.saveSong(getContext(), song);
                 loadRecentSongs();
-                Intent intent = new Intent(getContext(), PlayMusicActivity.class);
-                intent.putExtra("song_data", song);
-                startActivity(intent);
+
+                // 👇 SỬ DỤNG MINI PLAYER thay vì mở PlayMusicActivity
+                miniPlayerManager.playSong(song, data, data.indexOf(song));
+
+                // Hoặc nếu muốn mở full player:
+                // Intent intent = new Intent(getContext(), PlayMusicActivity.class);
+                // intent.putExtra("song_data", song);
+                // startActivity(intent);
             }
         });
 
@@ -170,7 +158,6 @@ public class HomeFragment extends Fragment {
         rv.setAdapter(adapter);
     }
 
-    // --- 5. SETUP ARTIST ---
     private void setupArtists() {
         apiService.getAllArtists().enqueue(new Callback<List<Artist>>() {
             @Override
@@ -181,9 +168,8 @@ public class HomeFragment extends Fragment {
                     rvArtists.setVisibility(View.VISIBLE);
 
                     ArtistAdapter adapter = new ArtistAdapter(getContext(), artists, artist -> {
-                        // 👇 SỬA TẠI ĐÂY: Mở màn hình chi tiết nghệ sĩ
                         Intent intent = new Intent(getContext(), ArtistDetailActivity.class);
-                        intent.putExtra("ARTIST_OBJ", artist); // Gửi cả object (đã implements Serializable)
+                        intent.putExtra("ARTIST_OBJ", artist);
                         startActivity(intent);
                     });
 
@@ -198,7 +184,6 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    // --- 6. SETUP CATEGORY ---
     private void setupCategories() {
         apiService.getAllCategories().enqueue(new Callback<List<Category>>() {
             @Override

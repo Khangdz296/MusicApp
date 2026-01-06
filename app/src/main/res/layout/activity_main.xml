@@ -5,16 +5,29 @@
     android:layout_height="match_parent"
     android:background="#121212">
 
+    <!-- ===== Fragment Container (Nội dung chính) ===== -->
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_above="@id/miniPlayerContainer"
+        tools:layout="@layout/fragment_home_hoang" />
+
+    <!-- ===== Mini Player (nằm trên Bottom Nav) ===== -->
+    <include
+        android:id="@+id/miniPlayerContainer"
+        layout="@layout/layout_mini_player_huy"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/bottom_nav_container" />
+
+    <!-- ===== Bottom Navigation ===== -->
     <include
         android:id="@+id/bottom_nav_container"
         layout="@layout/component_bottom_nav_hoang"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"/>
+        android:layout_alignParentBottom="true" />
 
-    <FrameLayout
-        android:id="@+id/fragment_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/bottom_nav_container"
-        tools:layout="@layout/fragment_home_hoang"/> </RelativeLayout>
+</RelativeLayout>
