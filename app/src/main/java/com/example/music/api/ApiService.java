@@ -70,9 +70,6 @@ public interface ApiService {
     @GET("api/songs/search")
     Call<List<Song>> searchSongs(@Query("q") String keyword);
 
-    @GET("api/playlists/user/{userId}")
-    Call<List<Playlist>> getUserPlaylists(@Path("userId") Long userId);
-
     @GET("api/albums")
     Call<List<Album>> getAllAlbums();
     @GET("api/songs/random")
@@ -123,4 +120,20 @@ public interface ApiService {
     Call<Void> deleteCategory(@Path("id") Long id);
     @GET("api/albums/top-views")
     Call<List<Album>> getTop50Albums();
+
+    // 1. Tạo Playlist mới (gửi name và image lên)
+    @POST("api/playlists/user/{userId}")
+    Call<Playlist> createPlaylist(@Path("userId") Long userId, @Body Playlist playlist);
+
+    // 2. Lấy danh sách Playlist của User
+    @GET("api/playlists/user/{userId}")
+    Call<List<Playlist>> getUserPlaylists(@Path("userId") Long userId);
+
+    // 3. Thêm bài hát vào Playlist
+    @POST("api/playlists/{playlistId}/add-song/{songId}")
+    Call<Playlist> addSongToPlaylist(@Path("playlistId") Long playlistId, @Path("songId") Long songId);
+
+    // 4. Xóa bài hát khỏi Playlist
+    @DELETE("api/playlists/{playlistId}/remove-song/{songId}")
+    Call<Playlist> removeSongFromPlaylist(@Path("playlistId") Long playlistId, @Path("songId") Long songId);
 }
