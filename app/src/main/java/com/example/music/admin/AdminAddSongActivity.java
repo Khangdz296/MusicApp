@@ -11,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.music.R;
 import com.example.music.api.ApiService;
 import com.example.music.api.RetrofitClient;
-import com.example.music.model.Artist; // Nhớ import Artist
+import com.example.music.model.Artist;
 import com.example.music.model.Category;
 import com.example.music.model.Song;
 
@@ -24,14 +24,19 @@ import retrofit2.Response;
 
 public class AdminAddSongActivity extends AppCompatActivity {
 
-    // Đổi tên biến edtArtist thành edtArtistId cho rõ nghĩa
-    private EditText edtTitle, edtArtistId, edtImage, edtFile, edtDuration;
-    private Spinner spinnerCategory;
+    private EditText edtTitle, edtImage, edtFile, edtDuration;
+    // Thay EditText bằng 2 Spinner
+    private Spinner spinnerCategory, spinnerArtist;
     private Button btnUpload, btnBack;
     private Song mSongToEdit = null;
 
+    // List cho Category
     private List<Category> categoryList = new ArrayList<>();
     private List<String> categoryNames = new ArrayList<>();
+
+    // List cho Artist (MỚI)
+    private List<Artist> artistList = new ArrayList<>();
+    private List<String> artistNames = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,58 +45,84 @@ public class AdminAddSongActivity extends AppCompatActivity {
 
         // 1. Ánh xạ
         edtTitle = findViewById(R.id.edtTitle);
-        edtArtistId = findViewById(R.id.edtArtist); // ID trong XML vẫn là edtArtist
         edtImage = findViewById(R.id.edtImage);
         edtFile = findViewById(R.id.edtFile);
         edtDuration = findViewById(R.id.edtDuration);
 
         spinnerCategory = findViewById(R.id.spinnerCategory);
+        spinnerArtist = findViewById(R.id.spinnerArtist); // Ánh xạ Spinner Artist mới
 
         btnUpload = findViewById(R.id.btnUpload);
         btnBack = findViewById(R.id.btnBack);
 
         btnBack.setOnClickListener(v -> finish());
 
-        // 2. Nhận dữ liệu Edit (nếu có)
+        // 2. Nhận dữ liệu Edit
         if (getIntent().getExtras() != null) {
             mSongToEdit = (Song) getIntent().getSerializableExtra("SONG_DATA");
         }
 
+        // 3. Load dữ liệu cho 2 Spinner
         loadCategoriesToSpinner();
+        loadArtistsToSpinner(); // <-- GỌI HÀM MỚI
 
-        // 3. Setup giao diện Edit
+        // 4. Setup giao diện Edit (Điền text đơn giản)
         if (mSongToEdit != null) {
-            setupEditMode();
+            btnUpload.setText("CẬP NHẬT BÀI HÁT");
+            edtTitle.setText(mSongToEdit.getTitle());
+            edtImage.setText(mSongToEdit.getImageUrl());
+            edtFile.setText(mSongToEdit.getFileUrl());
+            edtDuration.setText(String.valueOf(mSongToEdit.getDuration()));
         }
 
-        // 4. Xử lý nút bấm
+        // 5. Xử lý nút bấm
         btnUpload.setOnClickListener(v -> {
             if (validateInput()) {
                 if (mSongToEdit == null) {
-                    performUpload(); // Thêm mới
+                    performUpload();
                 } else {
-                    performUpdate(); // Cập nhật
+                    performUpdate();
                 }
             }
         });
     }
 
-    private void setupEditMode() {
-        btnUpload.setText("CẬP NHẬT BÀI HÁT");
+    // --- LOGIC LOAD ARTIST SPINNER (Y HỆT CATEGORY) ---
+    private void loadArtistsToSpinner() {
+        RetrofitClient.getClient().create(ApiService.class).getAllArtists().enqueue(new Callback<List<Artist>>() {
+            @Override
+            public void onResponse(Call<List<Artist>> call, Response<List<Artist>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    artistList = response.body();
+                    artistNames.clear();
+                    artistNames.add("--- Chọn Ca Sĩ ---"); // Dòng Hint
 
-        edtTitle.setText(mSongToEdit.getTitle());
+                    for (Artist art : artistList) {
+                        artistNames.add(art.getName());
+                    }
 
-        // --- SỬA LOGIC ARTIST: Hiển thị ID thay vì Tên ---
-        if (mSongToEdit.getArtist() != null) {
-            edtArtistId.setText(String.valueOf(mSongToEdit.getArtist().getId()));
-        }
-        // ------------------------------------------------
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(AdminAddSongActivity.this,
+                            R.layout.item_spinner_white, artistNames);
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    spinnerArtist.setAdapter(adapter);
 
-        edtImage.setText(mSongToEdit.getImageUrl());
-        edtFile.setText(mSongToEdit.getFileUrl());
-        edtDuration.setText(String.valueOf(mSongToEdit.getDuration()));
+                    // Nếu đang Edit -> Tự chọn lại Artist cũ
+                    if (mSongToEdit != null && mSongToEdit.getArtist() != null) {
+                        long oldId = mSongToEdit.getArtist().getId();
+                        for (int i = 0; i < artistList.size(); i++) {
+                            if (artistList.get(i).getId() == oldId) {
+                                spinnerArtist.setSelection(i + 1); // +1 vì có dòng hint
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            @Override public void onFailure(Call<List<Artist>> call, Throwable t) {}
+        });
     }
 
+    // --- LOGIC LOAD CATEGORY SPINNER (GIỮ NGUYÊN) ---
     private void loadCategoriesToSpinner() {
         RetrofitClient.getClient().create(ApiService.class).getAllCategories().enqueue(new Callback<List<Category>>() {
             @Override
@@ -106,11 +137,10 @@ public class AdminAddSongActivity extends AppCompatActivity {
                     }
 
                     ArrayAdapter<String> adapter = new ArrayAdapter<>(AdminAddSongActivity.this,
-                            android.R.layout.simple_spinner_item, categoryNames);
+                            R.layout.item_spinner_white, categoryNames);
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                     spinnerCategory.setAdapter(adapter);
 
-                    // Logic chọn lại category cũ
                     if (mSongToEdit != null && mSongToEdit.getCategory() != null) {
                         long oldCatId = mSongToEdit.getCategory().getId();
                         for (int i = 0; i < categoryList.size(); i++) {
@@ -122,11 +152,7 @@ public class AdminAddSongActivity extends AppCompatActivity {
                     }
                 }
             }
-
-            @Override
-            public void onFailure(Call<List<Category>> call, Throwable t) {
-                Toast.makeText(AdminAddSongActivity.this, "Lỗi tải thể loại!", Toast.LENGTH_SHORT).show();
-            }
+            @Override public void onFailure(Call<List<Category>> call, Throwable t) {}
         });
     }
 
@@ -135,13 +161,14 @@ public class AdminAddSongActivity extends AppCompatActivity {
             Toast.makeText(this, "Chưa nhập tên bài hát!", Toast.LENGTH_SHORT).show();
             return false;
         }
-        // Kiểm tra nhập ID Artist
-        if (edtArtistId.getText().toString().isEmpty()) {
-            Toast.makeText(this, "Chưa nhập ID Nghệ sĩ!", Toast.LENGTH_SHORT).show();
-            return false;
-        }
+        // Kiểm tra Spinner Category
         if (spinnerCategory.getSelectedItemPosition() == 0) {
             Toast.makeText(this, "Vui lòng chọn thể loại!", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        // Kiểm tra Spinner Artist (MỚI)
+        if (spinnerArtist.getSelectedItemPosition() == 0) {
+            Toast.makeText(this, "Vui lòng chọn ca sĩ!", Toast.LENGTH_SHORT).show();
             return false;
         }
         return true;
@@ -153,25 +180,16 @@ public class AdminAddSongActivity extends AppCompatActivity {
         song.setImageUrl(edtImage.getText().toString());
         song.setFileUrl(edtFile.getText().toString());
 
-        // --- SỬA LOGIC ARTIST: Tạo Object và set ID ---
-        Artist artist = new Artist();
-        try {
-            artist.setId(Long.parseLong(edtArtistId.getText().toString()));
-        } catch (NumberFormatException e) {
-            artist.setId(1L); // Default nếu nhập sai
-        }
-        song.setArtist(artist);
-        // ---------------------------------------------
+        try { song.setDuration(Integer.parseInt(edtDuration.getText().toString())); }
+        catch (Exception e) { song.setDuration(0); }
 
-        try {
-            song.setDuration(Integer.parseInt(edtDuration.getText().toString()));
-        } catch (NumberFormatException e) {
-            song.setDuration(0);
-        }
+        // 1. Lấy Category từ Spinner (Trừ 1 do hint)
+        int catPos = spinnerCategory.getSelectedItemPosition();
+        song.setCategory(categoryList.get(catPos - 1));
 
-        int selectedPosition = spinnerCategory.getSelectedItemPosition();
-        Category selectedCategory = categoryList.get(selectedPosition - 1);
-        song.setCategory(selectedCategory);
+        // 2. Lấy Artist từ Spinner (MỚI - Trừ 1 do hint)
+        int artPos = spinnerArtist.getSelectedItemPosition();
+        song.setArtist(artistList.get(artPos - 1));
 
         song.setFavorite(false);
 
@@ -181,12 +199,9 @@ public class AdminAddSongActivity extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     Toast.makeText(AdminAddSongActivity.this, "Upload thành công!", Toast.LENGTH_SHORT).show();
                     finish();
-                } else {
-                    Toast.makeText(AdminAddSongActivity.this, "Lỗi: " + response.code(), Toast.LENGTH_SHORT).show();
-                }
+                } else Toast.makeText(AdminAddSongActivity.this, "Lỗi: " + response.code(), Toast.LENGTH_SHORT).show();
             }
-            @Override
-            public void onFailure(Call<Song> call, Throwable t) {
+            @Override public void onFailure(Call<Song> call, Throwable t) {
                 Toast.makeText(AdminAddSongActivity.this, "Lỗi mạng!", Toast.LENGTH_SHORT).show();
             }
         });
@@ -197,27 +212,17 @@ public class AdminAddSongActivity extends AppCompatActivity {
         mSongToEdit.setImageUrl(edtImage.getText().toString());
         mSongToEdit.setFileUrl(edtFile.getText().toString());
 
-        // --- SỬA LOGIC ARTIST (Update) ---
-        Artist artist = new Artist();
-        try {
-            artist.setId(Long.parseLong(edtArtistId.getText().toString()));
-        } catch (NumberFormatException e) {
-            artist.setId(1L);
-        }
-        mSongToEdit.setArtist(artist);
-        // ---------------------------------
+        try { mSongToEdit.setDuration(Integer.parseInt(edtDuration.getText().toString())); }
+        catch (Exception e) { mSongToEdit.setDuration(0); }
 
-        try {
-            mSongToEdit.setDuration(Integer.parseInt(edtDuration.getText().toString()));
-        } catch (NumberFormatException e) {
-            mSongToEdit.setDuration(0);
-        }
+        // Update Category
+        int catPos = spinnerCategory.getSelectedItemPosition();
+        mSongToEdit.setCategory(categoryList.get(catPos - 1));
 
-        int selectedPosition = spinnerCategory.getSelectedItemPosition();
-        Category selectedCategory = categoryList.get(selectedPosition - 1);
-        mSongToEdit.setCategory(selectedCategory);
+        // Update Artist (MỚI)
+        int artPos = spinnerArtist.getSelectedItemPosition();
+        mSongToEdit.setArtist(artistList.get(artPos - 1));
 
-        // Lưu ý: Kiểm tra lại xem bạn dùng @PUT hay @POST ở ApiService
         RetrofitClient.getClient().create(ApiService.class)
                 .updateSong(mSongToEdit.getId(), mSongToEdit)
                 .enqueue(new Callback<Song>() {
@@ -226,12 +231,9 @@ public class AdminAddSongActivity extends AppCompatActivity {
                         if (response.isSuccessful()) {
                             Toast.makeText(AdminAddSongActivity.this, "Cập nhật thành công!", Toast.LENGTH_SHORT).show();
                             finish();
-                        } else {
-                            Toast.makeText(AdminAddSongActivity.this, "Lỗi server: " + response.code(), Toast.LENGTH_SHORT).show();
-                        }
+                        } else Toast.makeText(AdminAddSongActivity.this, "Lỗi: " + response.code(), Toast.LENGTH_SHORT).show();
                     }
-                    @Override
-                    public void onFailure(Call<Song> call, Throwable t) {
+                    @Override public void onFailure(Call<Song> call, Throwable t) {
                         Toast.makeText(AdminAddSongActivity.this, "Lỗi kết nối", Toast.LENGTH_SHORT).show();
                     }
                 });

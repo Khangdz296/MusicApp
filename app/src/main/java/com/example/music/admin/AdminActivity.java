@@ -21,6 +21,12 @@ public class AdminActivity extends AppCompatActivity {
             startActivity(new Intent(this, AdminSongManagerActivity.class));
         });
 
+        findViewById(R.id.btnManageArtists).setOnClickListener(v ->
+                startActivity(new Intent(this, AdminArtistManagerActivity.class))); // Sẽ tạo ở dưới
+
+        findViewById(R.id.btnManageCategories).setOnClickListener(v ->
+                startActivity(new Intent(this, AdminCategoryManagerActivity.class)));
+
         // 3. Đăng xuất (Về màn hình chính hoặc Login)
         findViewById(R.id.btnLogout).setOnClickListener(v -> {
             finish(); // Đóng Admin Activity

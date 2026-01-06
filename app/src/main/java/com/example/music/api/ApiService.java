@@ -102,4 +102,22 @@ public interface ApiService {
     Call<List<Album>> getAlbumsByArtistId(@Path("id") Long id);
     @PUT("api/admin/songs/{id}")
     Call<Song> updateSong(@Path("id") Long id, @Body Song song);
+    @POST("api/admin/artists")
+    Call<Artist> addArtist(@Body Artist artist);
+
+    @PUT("api/admin/artists/{id}")
+    Call<Artist> updateArtist(@Path("id") Long id, @Body Artist artist);
+
+    @DELETE("api/admin/artists/{id}")
+    Call<Void> deleteArtist(@Path("id") Long id);
+
+    // --- QUẢN LÝ CATEGORY ---
+    @POST("api/admin/categories")
+    Call<Category> addCategory(@Body Category category);
+
+    @PUT("api/admin/categories/{id}")
+    Call<Category> updateCategory(@Path("id") Long id, @Body Category category);
+
+    @DELETE("api/admin/categories/{id}")
+    Call<Void> deleteCategory(@Path("id") Long id);
 }

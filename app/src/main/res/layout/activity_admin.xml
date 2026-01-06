@@ -28,8 +28,20 @@
         android:id="@+id/btnGoToManage"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:text="QUẢN LÝ / XÓA BÀI HÁT"
+        android:text="QUẢN LÝ BÀI HÁT"
         android:backgroundTint="#E91E63"
+        android:layout_marginBottom="16dp"/>
+    <Button
+        android:id="@+id/btnManageArtists"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="QUẢN LÝ CA SĨ"
+        android:layout_marginBottom="16dp"/>
+    <Button
+        android:id="@+id/btnManageCategories"
+        android:text="QUẢN LÝ THỂ LOẠI"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
         android:layout_marginBottom="16dp"/>
 
     <Button
