@@ -11,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.music.MainActivity;
 import com.example.music.R;
 import com.example.music.api.ApiService;
 import com.example.music.api.RetrofitClient;
@@ -27,14 +28,13 @@ public class MenuActivity extends AppCompatActivity {
 
     CircleImageView imgProfile;
     TextView txtUsername, txtEmail;
-    ImageButton btnSettings;
+    ImageButton btnSettings, btnBackToHome; // 👇 Thêm nút Back
     LinearLayout menuFavourites, menuDownloads, menuEditProfile, menuProfile, menuPlaylist, menuLogout, btnChangePassword;
 
     ApiService apiService;
     SharedPreferences sharedPreferences;
     String sessionKey;
 
-    // ✅ LƯU THÔNG TIN USER ĐỂ TRUYỀN QUA PROFILEACTIVITY
     private ProfileResponse.UserData currentUser;
 
     @Override
@@ -63,6 +63,7 @@ public class MenuActivity extends AppCompatActivity {
         txtUsername = findViewById(R.id.txtUsername);
         txtEmail = findViewById(R.id.txtEmail);
         btnSettings = findViewById(R.id.btnSettings);
+        btnBackToHome = findViewById(R.id.btnBackToHome); // 👇 Ánh xạ nút Back
 
         menuFavourites = findViewById(R.id.menuFavourites);
         menuDownloads = findViewById(R.id.menuDownloads);
@@ -83,7 +84,6 @@ public class MenuActivity extends AppCompatActivity {
                     ProfileResponse profileResponse = response.body();
 
                     if ("success".equals(profileResponse.getStatus())) {
-                        // ✅ LƯU VÀO BIẾN currentUser
                         currentUser = profileResponse.getUser();
 
                         if (currentUser != null) {
@@ -93,7 +93,6 @@ public class MenuActivity extends AppCompatActivity {
                             Log.d(TAG, "Email: " + currentUser.getEmail());
                             Log.d(TAG, "Full Name: " + currentUser.getFull_name());
 
-                            // Hiển thị lên UI
                             txtUsername.setText(currentUser.getUsername());
                             txtEmail.setText(currentUser.getEmail());
                         }
@@ -131,6 +130,14 @@ public class MenuActivity extends AppCompatActivity {
     }
 
     private void setupMenuListeners() {
+        // 👇 NÚT QUAY VỀ HOME
+        btnBackToHome.setOnClickListener(v -> {
+            Intent intent = new Intent(MenuActivity.this, MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intent);
+            finish();
+        });
+
         btnSettings.setOnClickListener(v -> {
             Toast.makeText(this, "Settings đang phát triển", Toast.LENGTH_SHORT).show();
         });
@@ -143,15 +150,6 @@ public class MenuActivity extends AppCompatActivity {
             Toast.makeText(this, "Downloads đang phát triển", Toast.LENGTH_SHORT).show();
         });
 
-//        menuEditProfile.setOnClickListener(v -> {
-//            // ✅ TRUYỀN DỮ LIỆU QUA PROFILEACTIVITY
-//            navigateToProfileActivity();
-//        });
-
-//        menuProfile.setOnClickListener(v -> {
-//            // ✅ TRUYỀN DỮ LIỆU QUA PROFILEACTIVITY
-//            navigateToProfileActivity();
-//        });
         btnChangePassword.setOnClickListener(v -> {
             Intent intent = new Intent(MenuActivity.this, ChangePasswordActivity.class);
             startActivity(intent);
@@ -163,33 +161,6 @@ public class MenuActivity extends AppCompatActivity {
 
         menuLogout.setOnClickListener(v -> showLogoutDialog());
     }
-
-//    // ✅ HÀM MỚI - TRUYỀN DỮ LIỆU QUA INTENT
-//    private void navigateToProfileActivity() {
-//        if (currentUser != null) {
-//            Intent intent = new Intent(MenuActivity.this, ProfileActivity.class);
-//
-//            // Truyền dữ liệu qua Intent
-//            intent.putExtra("user_id", currentUser.getUser_id());
-//            intent.putExtra("username", currentUser.getUsername());
-//            intent.putExtra("email", currentUser.getEmail());
-//            intent.putExtra("full_name", currentUser.getFull_name());
-//
-//            Log.d(TAG, "✅ Chuyển sang ProfileActivity với dữ liệu:");
-//            Log.d(TAG, "User ID: " + currentUser.getUser_id());
-//            Log.d(TAG, "Username: " + currentUser.getUsername());
-//            Log.d(TAG, "Email: " + currentUser.getEmail());
-//            Log.d(TAG, "Full Name: " + currentUser.getFull_name());
-//
-//            startActivity(intent);
-//        } else {
-//            Toast.makeText(this,
-//                    "Vui lòng đợi load thông tin profile",
-//                    Toast.LENGTH_SHORT).show();
-//
-//            Log.w(TAG, "⚠️ currentUser is null, chưa load xong API");
-//        }
-//    }
 
     private void showLogoutDialog() {
         new AlertDialog.Builder(this)
@@ -221,7 +192,6 @@ public class MenuActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Reload profile mỗi khi quay lại Activity
         loadProfile();
     }
 }

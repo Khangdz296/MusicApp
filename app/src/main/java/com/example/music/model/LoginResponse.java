@@ -6,7 +6,7 @@ public class LoginResponse {
     private String message;
     private Long user_id;
     private String session_key;
-
+    private String role;
     public LoginResponse() {
     }
 
@@ -32,7 +32,9 @@ public class LoginResponse {
     public String getSession_key() {
         return session_key;
     }
-    
+    public String getRole() {
+        return role;
+    }
     public void setStatus(String status) {
         this.status = status;
     }
@@ -47,5 +49,9 @@ public class LoginResponse {
 
     public void setSession_key(String session_key) {
         this.session_key = session_key;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

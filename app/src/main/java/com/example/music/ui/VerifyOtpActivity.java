@@ -1,5 +1,6 @@
 package com.example.music.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -95,6 +96,12 @@ public class VerifyOtpActivity extends AppCompatActivity {
                 }
 
                 Toast.makeText(VerifyOtpActivity.this, "Xác minh OTP thành công!", Toast.LENGTH_LONG).show();
+
+                // ✅ Quay về màn hình đăng nhập
+                Intent intent = new Intent(VerifyOtpActivity.this, LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
             }
 
             @Override
