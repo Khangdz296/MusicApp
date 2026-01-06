@@ -30,7 +30,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="20dp"
         android:padding="8dp"
         android:rotation="180"
         android:src="@drawable/ic_status_arrow"
@@ -66,6 +66,6 @@
         android:paddingBottom="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/viewHeaderBackground"
-        tools:listitem="@layout/item_song_vertical_khang" />
+        tools:listitem="@layout/item_song_dhuy" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

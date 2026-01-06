@@ -59,6 +59,12 @@
             android:name=".ui.PlayMusicActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
+        <activity android:name=".admin.AdminActivity"
+            android:exported="false" />
+        <activity android:name=".admin.AdminAddSongActivity"
+            android:exported="false" />
+        <activity android:name=".admin.AdminSongManagerActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

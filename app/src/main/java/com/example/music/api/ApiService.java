@@ -19,6 +19,7 @@ import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
@@ -81,4 +82,14 @@ public interface ApiService {
     Call<List<Album>> getAllAlbums();
     @GET("api/songs/random")
     Call<List<Song>> getRandomSongs();
+    @POST("api/admin/songs")
+    Call<Song> addSong(@Body Song song);
+
+    // 2. Xóa bài hát
+    @DELETE("api/admin/songs/{id}")
+    Call<Void> deleteSong(@Path("id") Long id);
+
+    // 3. Lấy toàn bộ bài hát (Dùng lại API cũ hoặc tạo mới nếu cần phân trang admin)
+    @GET("api/songs")
+    Call<List<Song>> getAllSongsAdmin();
 }
