@@ -164,16 +164,16 @@ public class HomeFragment extends Fragment {
                 // 1. Thông báo
                 Toast.makeText(getContext(), "Phát: " + song.getTitle(), Toast.LENGTH_SHORT).show();
 
-                // 2. 👇 LƯU BÀI VỪA BẤM VÀO LỊCH SỬ
+                // 2. Lưu bài vừa bấm vào lịch sử
                 RecentSongManager.saveSong(getContext(), song);
 
-                // 3. 👇 LOAD LẠI MỤC "NGHE GẦN ĐÂY" NGAY LẬP TỨC ĐỂ THẤY SỰ THAY ĐỔI
+                // 3. Load lại mục "Nghe gần đây"
                 loadRecentSongs();
 
-                // 4. TODO: Chuyển sang PlayMusicActivity (Sau này làm)
-                // Intent intent = new Intent(getContext(), PlayMusicActivity.class);
-                // intent.putExtra("song_data", song);
-                // startActivity(intent);
+                // 4. ✅ CHUYỂN SANG PLAYMUSICACTIVITY
+                Intent intent = new Intent(getContext(), PlayMusicActivity.class);
+                intent.putExtra("song_data", song);
+                startActivity(intent);
             }
         });
 
