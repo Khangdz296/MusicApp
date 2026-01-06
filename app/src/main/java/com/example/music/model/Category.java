@@ -3,7 +3,7 @@ package com.example.music.model;
 import java.io.Serializable;
 
 public class Category implements Serializable {
-    // 👇 SỬA QUAN TRỌNG: Đổi String thành Long để khớp với Backend
+    // SỬA QUAN TRỌNG: Đổi String thành Long để khớp với Backend
     private Long id;
     private String name;
     private String imageUrl;
