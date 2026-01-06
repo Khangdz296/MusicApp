@@ -66,7 +66,6 @@ public class MenuActivity extends AppCompatActivity {
 
         menuFavourites = findViewById(R.id.menuFavourites);
         menuDownloads = findViewById(R.id.menuDownloads);
-        menuEditProfile = findViewById(R.id.menuEditProfile);
         btnChangePassword = findViewById(R.id.btnChangePassword);
         menuPlaylist = findViewById(R.id.menuPlaylist);
         menuLogout = findViewById(R.id.menuLogout);

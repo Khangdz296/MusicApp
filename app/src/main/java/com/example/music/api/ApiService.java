@@ -80,6 +80,8 @@ public interface ApiService {
 
     @GET("api/albums")
     Call<List<Album>> getAllAlbums();
+    @GET("api/songs/random")
+    Call<List<Song>> getRandomSongs();
 
     /**
      * 1. Lấy danh sách Public Playlists (Mục 2.7)
