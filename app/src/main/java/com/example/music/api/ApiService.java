@@ -64,12 +64,6 @@ public interface ApiService {
     Call<List<Song>> getSongsByCategory(@Path("id") Long id);
 
 
-    @GET("api/artists")
-    Call<List<Artist>> getAllArtists();
-
-    @GET("api/artists/{id}/songs")
-    Call<List<Song>> getSongsByArtist(@Path("id") Long id);
-
     @GET("api/songs/top-views")
     Call<List<Song>> getTopSongs();
 
@@ -93,6 +87,19 @@ public interface ApiService {
     // 3. Lấy toàn bộ bài hát (Dùng lại API cũ hoặc tạo mới nếu cần phân trang admin)
     @GET("api/songs")
     Call<List<Song>> getAllSongsAdmin();
+
+    // --- PHẦN NGHỆ SĨ (ARTIST) ---
+
+    @GET("api/artists")
+    Call<List<Artist>> getAllArtists();
+
+    // ✅ SỬA LẠI: Đường dẫn này phải khớp với SongController ở Backend
+    @GET("api/artists/{id}/songs")
+    Call<List<Song>> getSongsByArtistId(@Path("id") Long id);
+
+    // ✅ THÊM MỚI: API lấy danh sách Album của 1 nghệ sĩ (Để hiện thêm phần Album)
+    @GET("api/artists/{id}/albums")
+    Call<List<Album>> getAlbumsByArtistId(@Path("id") Long id);
     @PUT("api/admin/songs/{id}")
     Call<Song> updateSong(@Path("id") Long id, @Body Song song);
 }

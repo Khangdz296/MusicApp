@@ -137,7 +137,11 @@ public class PlayMusicActivity extends AppCompatActivity {
     private void displaySongInfo() {
         txtTitle.setText(currentSong.getTitle());
         txtSong.setText(currentSong.getTitle());
-        txtArtist.setText(currentSong.getArtist());
+        if (currentSong.getArtist() != null) {
+            txtArtist.setText(currentSong.getArtist().getName());
+        } else {
+            txtArtist.setText("Unknown Artist");
+        }
 
         Glide.with(this)
                 .load(currentSong.getImageUrl())

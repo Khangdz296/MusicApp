@@ -48,7 +48,11 @@ public class FavoriteSongAdapter extends RecyclerView.Adapter<FavoriteSongAdapte
 
         // Gán dữ liệu
         holder.tvTitle.setText(song.getTitle());
-        holder.tvSubtitle.setText("Song • " + song.getArtist()); // VD: Song • Sơn Tùng
+        if (song.getArtist() != null) {
+            holder.tvSubtitle.setText("Song • " + song.getArtist().getName());
+        } else {
+            holder.tvSubtitle.setText("Song • Unknown Artist");
+        }
 
         // Tải ảnh bằng Glide
         Glide.with(context)

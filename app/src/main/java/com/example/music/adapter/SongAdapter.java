@@ -66,7 +66,12 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
         }
 
         if (holder.tvArtist != null) {
-            holder.tvArtist.setText(song.getArtist());
+            if (song.getArtist() != null) {
+                // Lấy tên từ Object Artist
+                holder.tvArtist.setText(song.getArtist().getName());
+            } else {
+                holder.tvArtist.setText("Unknown Artist");
+            }
         }
 
         // Load ảnh bằng Glide

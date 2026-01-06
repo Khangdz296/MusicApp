@@ -44,7 +44,12 @@ public class AlbumSongAdapter extends RecyclerView.Adapter<AlbumSongAdapter.View
 
         // Gán dữ liệu
         holder.tvName.setText(song.getTitle());
-        holder.tvArtist.setText(song.getArtist());
+        if (song.getArtist() != null) {
+            // Lấy tên từ Object Artist
+            holder.tvArtist.setText(song.getArtist().getName());
+        } else {
+            holder.tvArtist.setText("Unknown Artist");
+        }
 
         // Load ảnh
         Glide.with(holder.itemView.getContext())

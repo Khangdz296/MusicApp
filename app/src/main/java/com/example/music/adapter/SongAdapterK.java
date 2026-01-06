@@ -19,22 +19,17 @@ public class SongAdapterK extends RecyclerView.Adapter<SongAdapterK.SongViewHold
 
     private Context context;
     private List<Song> list;
-    private OnSongClickListener listener; // 1. Khai báo biến Listener
+    private OnSongClickListener listener;
 
-    // 2. Tạo Interface để hứng sự kiện click
     public interface OnSongClickListener {
         void onSongClick(Song song);
     }
 
-    // 3. Cập nhật Constructor để nhận thêm Listener
     public SongAdapterK(Context context, List<Song> list, OnSongClickListener listener) {
         this.context = context;
         this.list = list;
         this.listener = listener;
     }
-
-    // Nếu bạn muốn giữ code cũ không bị lỗi ngay lập tức, có thể thêm constructor cũ (nhưng không khuyến khích)
-    // public SongAdapterK(Context context, List<Song> list) { ... }
 
     public void updateData(List<Song> newList) {
         this.list = newList;
@@ -54,7 +49,13 @@ public class SongAdapterK extends RecyclerView.Adapter<SongAdapterK.SongViewHold
         if (song == null) return;
 
         holder.tvSongName.setText(song.getTitle());
-        holder.tvArtist.setText(song.getArtist());
+
+        // 👇 SỬA LẠI: Lấy tên từ Object Artist
+        if (song.getArtist() != null) {
+            holder.tvArtist.setText(song.getArtist().getName());
+        } else {
+            holder.tvArtist.setText("Unknown Artist");
+        }
 
         Glide.with(context)
                 .load(song.getImageUrl())
@@ -62,13 +63,11 @@ public class SongAdapterK extends RecyclerView.Adapter<SongAdapterK.SongViewHold
                 .error(R.drawable.ic_launcher_background)
                 .into(holder.imgAlbum);
 
-        // --- 4. BẮT SỰ KIỆN CLICK VÀO ITEM ---
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
-                listener.onSongClick(song); // Truyền bài hát ra ngoài
+                listener.onSongClick(song);
             }
         });
-        // -------------------------------------
     }
 
     @Override

@@ -54,7 +54,11 @@ public class AdminSongAdapter extends RecyclerView.Adapter<AdminSongAdapter.Song
 
         // Gán thông tin
         holder.tvSongName.setText(song.getTitle());
-        holder.tvArtist.setText(song.getArtist());
+        if (song.getArtist() != null) {
+            holder.tvArtist.setText(song.getArtist().getName());
+        } else {
+            holder.tvArtist.setText("Unknown Artist");
+        }
 
         // Load ảnh
         Glide.with(context)
