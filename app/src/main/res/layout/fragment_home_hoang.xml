@@ -110,7 +110,7 @@
             android:orientation="horizontal"
             android:layout_marginStart="12dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:listitem="@layout/item_square_hoang"/>
+            tools:listitem="@layout/item_chart_card"/>
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

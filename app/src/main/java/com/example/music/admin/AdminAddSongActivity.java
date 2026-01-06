@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.music.R;
 import com.example.music.api.ApiService;
 import com.example.music.api.RetrofitClient;
+import com.example.music.model.Artist;
 import com.example.music.model.Category;
 import com.example.music.model.Song;
 
@@ -18,7 +19,7 @@ import retrofit2.Response;
 
 public class AdminAddSongActivity extends AppCompatActivity {
 
-    private EditText edtTitle, edtArtist, edtImage, edtFile, edtDuration, edtCatId;
+    private EditText edtTitle, edtArtistId, edtImage, edtFile, edtDuration, edtCatId;
     private Button btnUpload, btnBack;
 
     @Override
@@ -28,7 +29,7 @@ public class AdminAddSongActivity extends AppCompatActivity {
 
         // 1. Ánh xạ View
         edtTitle = findViewById(R.id.edtTitle);
-        edtArtist = findViewById(R.id.edtArtist);
+        edtArtistId = findViewById(R.id.edtArtist);
         edtImage = findViewById(R.id.edtImage);
         edtFile = findViewById(R.id.edtFile);
         edtDuration = findViewById(R.id.edtDuration);
@@ -58,7 +59,13 @@ public class AdminAddSongActivity extends AppCompatActivity {
         // Tạo object Song từ dữ liệu nhập
         Song song = new Song();
         song.setTitle(edtTitle.getText().toString());
-        song.setArtist(edtArtist.getText().toString());
+        Artist artist = new Artist();
+        try {
+            artist.setId(Long.parseLong(edtArtistId.getText().toString()));
+        } catch (NumberFormatException e) {
+            artist.setId(1L); // Mặc định ID 1 nếu nhập lỗi
+        }
+        song.setArtist(artist);
         song.setImageUrl(edtImage.getText().toString());
         song.setFileUrl(edtFile.getText().toString());
 

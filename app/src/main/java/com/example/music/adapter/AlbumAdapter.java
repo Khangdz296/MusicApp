@@ -50,8 +50,11 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumViewHol
         holder.tvTitle.setText(album.getName());
 
         // 2. Tên Nghệ sĩ (Kiểm tra null cho chắc chắn)
-        String artist = (album.getArtistName() != null) ? album.getArtistName() : "Unknown Artist";
-        holder.tvSubtitle.setText("Album • " + artist);
+        String artistName = "Unknown Artist";
+        if (album.getArtist() != null) {
+            artistName = album.getArtist().getName();
+        }
+        holder.tvSubtitle.setText("Album • " + artistName);
 
         // 3. Load ảnh (Thêm xử lý khi ảnh bị lỗi load)
         Glide.with(context)

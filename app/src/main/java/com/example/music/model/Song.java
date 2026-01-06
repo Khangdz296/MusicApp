@@ -13,7 +13,7 @@ public class Song implements Serializable {
     private String title;
 
     @SerializedName("artist")
-    private String artist;
+    private Artist artist;
 
     @SerializedName("imageUrl") // Backend có thể trả về "imageUrl" hoặc "image_url" tùy config
     private String imageUrl;
@@ -38,7 +38,7 @@ public class Song implements Serializable {
     }
 
     // Constructor cập nhật đầy đủ tham số
-    public Song(Long id, String title, String artist, String imageUrl, String fileUrl, int duration, boolean isFavorite, Category category, int views) {
+    public Song(Long id, String title, Artist artist, String imageUrl, String fileUrl, int duration, boolean isFavorite, Category category, int views) {
         this.id = id;
         this.title = title;
         this.artist = artist;
@@ -58,8 +58,8 @@ public class Song implements Serializable {
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
 
-    public String getArtist() { return artist; }
-    public void setArtist(String artist) { this.artist = artist; }
+    public Artist getArtist() { return artist; }
+    public void setArtist(Artist artist) { this.artist = artist; }
 
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
