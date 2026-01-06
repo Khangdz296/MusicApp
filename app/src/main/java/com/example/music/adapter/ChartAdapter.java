@@ -24,26 +24,37 @@ public class ChartAdapter extends RecyclerView.Adapter<ChartAdapter.ChartViewHol
 
     @Override
     public void onBindViewHolder(@NonNull ChartViewHolder holder, int position) {
-        // CẤU HÌNH THẺ DUY NHẤT: TOP VIEWS
+        // Cấu hình dựa trên vị trí (position)
+        if (position == 0) {
+            // --- THẺ 1: MOST VIEWED (BÀI HÁT) ---
+            holder.layoutBg.setBackgroundResource(R.drawable.bg_chart_vietnam);
+            holder.tvName.setText("MOST VIEWED");
+            holder.tvFooter.setText("BXH Nhiều Lượt Xem Nhất");
 
-        // 1. Set màu nền
-        holder.layoutBg.setBackgroundResource(R.drawable.bg_chart_vietnam);
+            holder.itemView.setOnClickListener(v -> {
+                Intent intent = new Intent(v.getContext(), ChartDetailActivity.class);
+                intent.putExtra("CHART_TYPE", "SONGS"); // Gửi nhãn "SONGS"
+                v.getContext().startActivity(intent);
+            });
 
-        // 2. Set nội dung
-        holder.tvName.setText("MOST VIEWED");
-        holder.tvFooter.setText("BXH Nhiều Lượt Xem Nhất");
+        } else {
+            // --- THẺ 2: TOP ALBUMS (ALBUM) ---
+            // Bạn có thể đổi màu nền khác nếu có (ví dụ bg_chart_global)
+            holder.layoutBg.setBackgroundResource(R.drawable.bg_chart_vietnam);
+            holder.tvName.setText("TOP ALBUMS");
+            holder.tvFooter.setText("BXH Album Phổ Biến");
 
-        // 👇 3. BẮT SỰ KIỆN CLICK (Đã sửa hoàn chỉnh)
-        holder.itemView.setOnClickListener(v -> {
-            // Tạo Intent chuyển sang màn hình Chi tiết BXH
-            Intent intent = new Intent(v.getContext(), ChartDetailActivity.class);
-            v.getContext().startActivity(intent);
-        });
+            holder.itemView.setOnClickListener(v -> {
+                Intent intent = new Intent(v.getContext(), ChartDetailActivity.class);
+                intent.putExtra("CHART_TYPE", "ALBUMS"); // Gửi nhãn "ALBUMS"
+                v.getContext().startActivity(intent);
+            });
+        }
     }
 
     @Override
     public int getItemCount() {
-        return 1; // Chỉ hiện 1 thẻ
+        return 2; // Hiển thị 2 thẻ (Bài hát và Album)
     }
 
     public static class ChartViewHolder extends RecyclerView.ViewHolder {
