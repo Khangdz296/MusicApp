@@ -7,6 +7,7 @@
     android:background="#121212">
 
     <RelativeLayout
+        android:id="@+id/headerLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/bg_chart_vietnam"
@@ -24,6 +25,7 @@
             app:tint="#FFFFFF" />
 
         <TextView
+            android:id="@+id/tvTitleMain"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
@@ -33,14 +35,12 @@
             android:textStyle="bold" />
 
         <TextView
-            android:layout_width="198dp"
+            android:id="@+id/tvTitleSub"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/btnBack"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentEnd="true"
-            android:layout_marginStart="119dp"
-            android:layout_marginTop="18dp"
-            android:layout_marginEnd="110dp"
+            android:layout_below="@+id/tvTitleMain"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
             android:text="Top 50 bài hát nhiều lượt xem nhất"
             android:textColor="#EEEEEE"
             android:textSize="14sp" />

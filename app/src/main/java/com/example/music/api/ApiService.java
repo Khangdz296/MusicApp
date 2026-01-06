@@ -102,4 +102,6 @@ public interface ApiService {
     Call<List<Album>> getAlbumsByArtistId(@Path("id") Long id);
     @PUT("api/admin/songs/{id}")
     Call<Song> updateSong(@Path("id") Long id, @Body Song song);
+    @GET("api/albums/top-views")
+    Call<List<Album>> getTop50Albums();
 }
