@@ -79,4 +79,6 @@ public interface ApiService {
 
     @GET("api/albums")
     Call<List<Album>> getAllAlbums();
+    @GET("api/songs/random")
+    Call<List<Song>> getRandomSongs();
 }
