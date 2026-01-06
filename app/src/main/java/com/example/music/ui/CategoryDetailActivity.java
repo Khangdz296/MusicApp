@@ -1,5 +1,6 @@
 package com.example.music.ui;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,6 +32,9 @@ public class CategoryDetailActivity extends AppCompatActivity {
     private View viewHeader;
     private ImageView btnBack;
 
+    // 👇 Lưu danh sách bài hát để truyền sang PlayMusicActivity
+    private List<Song> currentSongList = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,8 +61,15 @@ public class CategoryDetailActivity extends AppCompatActivity {
         songAdapter = new SongAdapterK(this, new ArrayList<>(), new SongAdapterK.OnSongClickListener() {
             @Override
             public void onSongClick(Song song) {
-                // Tạm thời log ra hoặc để trống nếu chưa làm Player
-                Log.d("CATEGORY_CLICK", "Click bài trong Category: " + song.getTitle());
+                // 👇 Tìm vị trí bài hát trong danh sách
+                int position = currentSongList.indexOf(song);
+
+                // 👇 Chuyển sang PlayMusicActivity với đầy đủ thông tin
+                Intent intent = new Intent(CategoryDetailActivity.this, PlayMusicActivity.class);
+                intent.putExtra("song_data", song);
+                intent.putExtra("current_position", position);
+                intent.putExtra("song_list", new ArrayList<>(currentSongList));
+                startActivity(intent);
             }
         });
         rcvSongs.setAdapter(songAdapter);
@@ -74,7 +85,9 @@ public class CategoryDetailActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<List<Song>> call, Response<List<Song>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    songAdapter.updateData(response.body());
+                    // 👇 Lưu danh sách vào biến để dùng khi click
+                    currentSongList = response.body();
+                    songAdapter.updateData(currentSongList);
                 }
             }
 

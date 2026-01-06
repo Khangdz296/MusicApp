@@ -1,5 +1,6 @@
 package com.example.music.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -63,11 +64,18 @@ public class AlbumDetailActivity extends AppCompatActivity {
             List<Song> songs = album.getSongs();
             if (songs == null) songs = new ArrayList<>();
 
-            // 👇 5. CẤU HÌNH RECYCLERVIEW VỚI ADAPTER MỚI
+            List<Song> finalSongs = songs; // Lưu biến final để dùng trong lambda
+
             AlbumSongAdapter adapter = new AlbumSongAdapter(songs, new AlbumSongAdapter.OnItemClickListener() {
                 @Override
                 public void onItemClick(Song song) {
-                    Toast.makeText(AlbumDetailActivity.this, "Đang phát: " + song.getTitle(), Toast.LENGTH_SHORT).show();
+                    int position = finalSongs.indexOf(song); // ✅ Tìm vị trí bài hát
+
+                    Intent intent = new Intent(AlbumDetailActivity.this, PlayMusicActivity.class);
+                    intent.putExtra("song_data", song);
+                    intent.putExtra("current_position", position);        // ✅ Thêm vị trí
+                    intent.putExtra("song_list", new ArrayList<>(finalSongs)); // ✅ Thêm danh sách
+                    startActivity(intent);
                 }
             });
 
