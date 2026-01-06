@@ -42,14 +42,6 @@ public class FavoriteSongsFragment extends Fragment {
         // 👇 CẬP NHẬT CONSTRUCTOR SONG (Thêm số view vào cuối cùng)
         // new Song(id, title, artist, img, file, duration, isFavorite, category, VIEWS)
 
-        list.add(new Song(1L, "Muộn Rồi Mà Sao Còn", "Sơn Tùng M-TP",
-                "https://i.scdn.co/image/ab6761610000e5ebc53f7c462377b7f1e7373f52", "", 300, true, catPop, 1500000));
-
-        list.add(new Song(2L, "Nàng Thơ", "Hoàng Dũng",
-                "https://i.scdn.co/image/ab6761610000e5ebc6b73df78cb0ce400d43dfc6", "", 300, true, catPop, 850000));
-
-        list.add(new Song(3L, "Waiting For You", "MONO",
-                "https://i.scdn.co/image/ab6761610000e5eb54e7d44869c43d2cc95e54c8", "", 280, true, catPop, 2000000));
 
         // 3. KHỞI TẠO ADAPTER
         // Lưu ý: Đảm bảo class FavoriteSongAdapter của bạn đã nhận đúng Model Song mới

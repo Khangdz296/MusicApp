@@ -60,6 +60,16 @@ public class CategoryDetailActivity extends AppCompatActivity {
                 // Tạm thời log ra hoặc để trống nếu chưa làm Player
                 Log.d("CATEGORY_CLICK", "Click bài trong Category: " + song.getTitle());
             }
+            @Override
+            public void onAddToPlaylistClick(Song song) {
+                // Tạm thời log ra hoặc để trống nếu chưa làm Player
+                Log.d("CATEGORY_CLICK", "Click add playlist trong Category: " + song.getTitle());
+            }
+            @Override
+            public void onFavoriteClick(Song song) {
+                Log.d("CATEGORY_CLICK", "Click favorite trong Category: " + song.getTitle());
+            }
+
         });
         rcvSongs.setAdapter(songAdapter);
 
