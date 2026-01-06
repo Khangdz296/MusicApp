@@ -48,7 +48,7 @@
             tools:listitem="@layout/item_recent_hoang"/>
 
         <TextView
-            android:text="Your 2025 in review"
+            android:text="Hôm nay nghe gì?"
             style="@style/SpotifyTitle"/>
 
         <androidx.recyclerview.widget.RecyclerView

@@ -51,6 +51,10 @@
         <activity
             android:name=".ui.CategoryDetailActivity"
             android:exported="false" />
+
+        <activity android:name=".ui.AlbumDetailActivity"
+            android:exported="false" />
+
         <activity
             android:name=".ui.PlayMusicActivity"
             android:exported="false"
