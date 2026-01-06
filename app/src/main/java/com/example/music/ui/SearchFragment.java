@@ -71,7 +71,22 @@ public class SearchFragment extends Fragment {
 
         // 3. Cài đặt Search Result Adapter
         rcvSearchResults.setLayoutManager(new LinearLayoutManager(getContext()));
-        songAdapter = new SongAdapterK(new ArrayList<>());
+
+        // Thêm tham số thứ 3 là Listener
+        songAdapter = new SongAdapterK(getContext(), new ArrayList<>(), new SongAdapterK.OnSongClickListener() {
+            @Override
+            public void onSongClick(Song song) {
+                // --- IN LOG RA MÀN HÌNH ---
+                Log.d("SEARCH_CLICK", "Người dùng đã chọn bài: " + song.getTitle());
+                Log.d("SEARCH_CLICK", "ID bài hát: " + song.getId());
+                Log.d("SEARCH_CLICK", "Link nhạc: " + song.getFileUrl());
+
+                // Sau này sẽ code chuyển màn hình PlayerActivity ở đây
+                // Intent intent = new Intent(getContext(), PlayerActivity.class);
+                // intent.putExtra("SONG_OBJECT", song);
+                // startActivity(intent);
+            }
+        });
         rcvSearchResults.setAdapter(songAdapter);
 
         // 4. Load dữ liệu Category ban đầu
