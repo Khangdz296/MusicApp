@@ -20,7 +20,19 @@
             android:layout_marginBottom="24dp"/>
 
         <EditText android:id="@+id/edtTitle" android:hint="Tên bài hát" style="@style/AdminInputStyle"/>
-        <EditText android:id="@+id/edtArtist" android:hint="Tên ca sĩ" style="@style/AdminInputStyle"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Chọn Ca Sĩ:"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="8dp"/>
+
+        <Spinner
+            android:id="@+id/spinnerArtist"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@drawable/bg_input_field"
+            android:layout_marginBottom="16dp"/>
         <EditText android:id="@+id/edtImage" android:hint="Link ảnh (URL)" style="@style/AdminInputStyle"/>
         <EditText android:id="@+id/edtFile" android:hint="Link file nhạc (URL .mp3)" style="@style/AdminInputStyle"/>
         <EditText android:id="@+id/edtDuration" android:hint="Thời lượng (giây)" android:inputType="number" style="@style/AdminInputStyle"/>
