@@ -2,6 +2,7 @@ package com.example.music.ui;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -53,7 +54,13 @@ public class CategoryDetailActivity extends AppCompatActivity {
 
         // 4. Setup RecyclerView
         rcvSongs.setLayoutManager(new LinearLayoutManager(this));
-        songAdapter = new SongAdapterK(new ArrayList<>());
+        songAdapter = new SongAdapterK(this, new ArrayList<>(), new SongAdapterK.OnSongClickListener() {
+            @Override
+            public void onSongClick(Song song) {
+                // Tạm thời log ra hoặc để trống nếu chưa làm Player
+                Log.d("CATEGORY_CLICK", "Click bài trong Category: " + song.getTitle());
+            }
+        });
         rcvSongs.setAdapter(songAdapter);
 
         // 5. Gọi API lấy bài hát
