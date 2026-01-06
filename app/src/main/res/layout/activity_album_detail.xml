@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#121212">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:paddingTop="40dp"
+            android:paddingBottom="20dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:background="#1E1E1E">
+
+            <ImageView
+                android:id="@+id/imgAlbumCover"
+                android:layout_width="160dp"
+                android:layout_height="160dp"
+                android:src="@drawable/ic_launcher_background"
+                android:scaleType="centerCrop"/>
+
+            <TextView
+                android:id="@+id/tvAlbumName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tên Album"
+                android:textColor="#FFFFFF"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:layout_marginTop="10dp"/>
+
+            <TextView
+                android:id="@+id/tvArtistName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ca sĩ"
+                android:textColor="#AAAAAA"
+                android:textSize="16sp"/>
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_arrow_back"
+            android:layout_gravity="start|top"
+            android:layout_margin="12dp"
+            android:padding="10dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="#FFFFFF"
+            xmlns:app="http://schemas.android.com/apk/res-auto"/>
+    </FrameLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvSongs"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="10dp"/>
+
+</LinearLayout>
