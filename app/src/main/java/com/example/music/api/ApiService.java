@@ -1,10 +1,12 @@
 package com.example.music.api;
 
+import com.example.music.model.Album;
 import com.example.music.model.Artist;
 import com.example.music.model.Category;
 import com.example.music.model.ChangePasswordResponse;
 import com.example.music.model.LoginRequest;
 import com.example.music.model.LoginResponse;
+import com.example.music.model.Playlist;
 import com.example.music.model.ProfileResponse;
 import com.example.music.model.RegisterResponse;
 import com.example.music.model.Song;
@@ -71,4 +73,10 @@ public interface ApiService {
 
     @GET("api/songs/search")
     Call<List<Song>> searchSongs(@Query("q") String keyword);
+
+    @GET("api/playlists/user/{userId}")
+    Call<List<Playlist>> getUserPlaylists(@Path("userId") Long userId);
+
+    @GET("api/albums")
+    Call<List<Album>> getAllAlbums();
 }

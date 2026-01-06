@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide; // 👇 Nhớ import Glide
 import com.example.music.R;
 import com.example.music.model.Playlist;
 
@@ -19,7 +20,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
 
     private List<Playlist> playlists;
     private Context context;
-    private OnPlaylistClickListener listener; // Interface để xử lý click
+    private OnPlaylistClickListener listener;
 
     // Interface cho sự kiện click
     public interface OnPlaylistClickListener {
@@ -35,7 +36,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     @NonNull
     @Override
     public PlaylistViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Load layout item_playlist_grid.xml
+        // Load layout item_playlist_grid.xml (Dạng ô vuông)
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_playlist_grid, parent, false);
         return new PlaylistViewHolder(view);
     }
@@ -43,15 +44,26 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     @Override
     public void onBindViewHolder(@NonNull PlaylistViewHolder holder, int position) {
         Playlist playlist = playlists.get(position);
+        if (playlist == null) return;
 
+        // 1. Set Tên Playlist
         holder.tvName.setText(playlist.getName());
-        holder.tvOwner.setText("Bởi: " + playlist.getOwnerName());
 
-        // Load ảnh bằng Glide (nếu có URL), tạm thời set ảnh demo
-        // Glide.with(context).load(playlist.getImageUrl()).into(holder.imgCover);
-        holder.imgCover.setImageResource(R.drawable.ic_launcher_background);
+        // 2. Set Tên Người tạo (Logic mới: Lấy từ User object)
+        String ownerName = "Unknown";
+        if (playlist.getUser() != null && playlist.getUser().getUsername() != null) {
+            ownerName = playlist.getUser().getUsername();
+        }
+        holder.tvOwner.setText("Bởi: " + ownerName);
 
-        // Bắt sự kiện click vào cả cái ô playlist
+        // 3. Load ảnh bằng Glide
+        Glide.with(context)
+                .load(playlist.getImageUrl())
+                .placeholder(R.drawable.ic_launcher_background) // Ảnh chờ
+                .error(R.drawable.ic_launcher_background)       // Ảnh lỗi
+                .into(holder.imgCover);
+
+        // 4. Bắt sự kiện click
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onPlaylistClick(playlist);
@@ -61,7 +73,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
 
     @Override
     public int getItemCount() {
-        return playlists.size();
+        return playlists != null ? playlists.size() : 0;
     }
 
     public static class PlaylistViewHolder extends RecyclerView.ViewHolder {
@@ -70,6 +82,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
 
         public PlaylistViewHolder(@NonNull View itemView) {
             super(itemView);
+            // Đảm bảo file item_playlist_grid.xml có các ID này
             imgCover = itemView.findViewById(R.id.imgPlaylistCover);
             tvName = itemView.findViewById(R.id.tvPlaylistName);
             tvOwner = itemView.findViewById(R.id.tvPlaylistOwner);

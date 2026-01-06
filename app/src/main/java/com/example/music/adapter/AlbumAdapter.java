@@ -19,14 +19,14 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumViewHol
 
     private Context context;
     private List<Album> mList;
-    private OnAlbumClickListener listener; // Biến listener
+    private OnAlbumClickListener listener;
 
     // Interface bắt sự kiện click
     public interface OnAlbumClickListener {
         void onAlbumClick(Album album);
     }
 
-    // 👇 CONSTRUCTOR NÀY QUAN TRỌNG: PHẢI CÓ 3 THAM SỐ
+    // Constructor chuẩn
     public AlbumAdapter(Context context, List<Album> mList, OnAlbumClickListener listener) {
         this.context = context;
         this.mList = mList;
@@ -36,6 +36,7 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumViewHol
     @NonNull
     @Override
     public AlbumViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        // 👇 Dùng chung layout với Playlist (item_library_row_hoang.xml) cho đồng bộ giao diện
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_library_row_hoang, parent, false);
         return new AlbumViewHolder(view);
     }
@@ -45,15 +46,21 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumViewHol
         Album album = mList.get(position);
         if (album == null) return;
 
+        // 1. Tên Album
         holder.tvTitle.setText(album.getName());
-        holder.tvSubtitle.setText("Album • " + album.getArtistName());
 
+        // 2. Tên Nghệ sĩ (Kiểm tra null cho chắc chắn)
+        String artist = (album.getArtistName() != null) ? album.getArtistName() : "Unknown Artist";
+        holder.tvSubtitle.setText("Album • " + artist);
+
+        // 3. Load ảnh (Thêm xử lý khi ảnh bị lỗi load)
         Glide.with(context)
                 .load(album.getImageUrl())
-                .placeholder(R.drawable.ic_launcher_background)
+                .placeholder(R.drawable.ic_launcher_background) // Ảnh chờ
+                .error(R.drawable.ic_launcher_background)       // Ảnh lỗi (nếu link chết)
                 .into(holder.imgThumb);
 
-        // Bắt sự kiện click
+        // 4. Sự kiện Click
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onAlbumClick(album);
         });
@@ -64,6 +71,7 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumViewHol
         return mList != null ? mList.size() : 0;
     }
 
+    // ViewHolder ánh xạ các View trong item_library_row_hoang.xml
     public static class AlbumViewHolder extends RecyclerView.ViewHolder {
         ImageView imgThumb;
         TextView tvTitle, tvSubtitle;

@@ -15,14 +15,13 @@ import com.example.music.model.Playlist;
 
 import java.util.List;
 
-// Đặt tên khác đi để không trùng với file của người kia
 public class LibraryPlaylistAdapter extends RecyclerView.Adapter<LibraryPlaylistAdapter.ViewHolder> {
 
     private Context context;
     private List<Playlist> playlists;
     private OnItemClickListener listener;
 
-    // Interface riêng cho Adapter này
+    // Interface bắt sự kiện click
     public interface OnItemClickListener {
         void onItemClick(Playlist playlist);
     }
@@ -36,7 +35,7 @@ public class LibraryPlaylistAdapter extends RecyclerView.Adapter<LibraryPlaylist
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // 👇 Dùng đúng layout CỦA BẠN (Dạng danh sách)
+        // Dùng layout item_library_row_hoang.xml
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_library_row_hoang, parent, false);
         return new ViewHolder(view);
     }
@@ -46,20 +45,27 @@ public class LibraryPlaylistAdapter extends RecyclerView.Adapter<LibraryPlaylist
         Playlist playlist = playlists.get(position);
         if (playlist == null) return;
 
-        // Gán dữ liệu
+        // 1. Gán tên Playlist
         holder.tvTitle.setText(playlist.getName());
 
-        String owner = (playlist.getOwnerName() != null) ? playlist.getOwnerName() : "Unknown";
-        holder.tvSubtitle.setText("Playlist • " + owner);
+        // 2. Gán tên người tạo (Logic mới: Lấy từ User object)
+        String ownerName = "Unknown";
+        if (playlist.getUser() != null) {
+            // Kiểm tra null để tránh lỗi crash
+            if (playlist.getUser().getUsername() != null) {
+                ownerName = playlist.getUser().getUsername();
+            }
+        }
+        holder.tvSubtitle.setText("Playlist • " + ownerName);
 
-        // Load ảnh
+        // 3. Load ảnh bìa
         Glide.with(context)
                 .load(playlist.getImageUrl())
-                .placeholder(R.drawable.ic_launcher_background)
-                .error(R.drawable.ic_launcher_background)
+                .placeholder(R.drawable.ic_launcher_background) // Ảnh chờ
+                .error(R.drawable.ic_launcher_background)       // Ảnh lỗi
                 .into(holder.imgThumb);
 
-        // Bắt sự kiện click
+        // 4. Bắt sự kiện click vào item
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onItemClick(playlist);
         });
@@ -70,13 +76,13 @@ public class LibraryPlaylistAdapter extends RecyclerView.Adapter<LibraryPlaylist
         return playlists != null ? playlists.size() : 0;
     }
 
+    // ViewHolder ánh xạ view
     public class ViewHolder extends RecyclerView.ViewHolder {
         ImageView imgThumb;
         TextView tvTitle, tvSubtitle;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            // Ánh xạ đúng ID trong item_library_row_hoang.xml
             imgThumb = itemView.findViewById(R.id.imgThumb);
             tvTitle = itemView.findViewById(R.id.tvTitle);
             tvSubtitle = itemView.findViewById(R.id.tvSubtitle);

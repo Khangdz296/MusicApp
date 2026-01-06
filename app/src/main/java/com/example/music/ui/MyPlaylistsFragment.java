@@ -1,48 +1,88 @@
 package com.example.music.ui;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.music.adapter.LibraryPlaylistAdapter; // Dùng adapter riêng của bạn
+import com.example.music.adapter.LibraryPlaylistAdapter;
+import com.example.music.api.ApiService;
+import com.example.music.api.RetrofitClient;
 import com.example.music.model.Playlist;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class MyPlaylistsFragment extends Fragment {
+
+    private RecyclerView recyclerView;
+    private LibraryPlaylistAdapter adapter;
+    private List<Playlist> playlistList;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // Tạo RecyclerView bằng code (đỡ phải tạo file XML riêng)
-        RecyclerView recyclerView = new RecyclerView(getContext());
+        // 1. Setup giao diện
+        recyclerView = new RecyclerView(getContext());
         recyclerView.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
         recyclerView.setBackgroundColor(0xFF121212); // Nền đen
-
-        // Setup LayoutManager
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Tạo dữ liệu giả
-        List<Playlist> list = new ArrayList<>();
-        list.add(new Playlist("1", "Nhạc Code Dạo", "Hoàng", "https://picsum.photos/200/200?random=1"));
-        list.add(new Playlist("2", "Chill Cuối Tuần", "Spotify", "https://picsum.photos/200/200?random=2"));
-        list.add(new Playlist("3", "Tập Gym", "Gym Lord", "https://picsum.photos/200/200?random=3"));
-
-        // Gọi Adapter
-        LibraryPlaylistAdapter adapter = new LibraryPlaylistAdapter(getContext(), list, playlist -> {
-            // Xử lý khi click vào playlist (để sau)
+        // 2. Setup Adapter rỗng trước
+        playlistList = new ArrayList<>();
+        adapter = new LibraryPlaylistAdapter(getContext(), playlistList, playlist -> {
+            Toast.makeText(getContext(), "Mở Playlist: " + playlist.getName(), Toast.LENGTH_SHORT).show();
+            // TODO: Code mở chi tiết playlist sau
         });
         recyclerView.setAdapter(adapter);
 
+        // 3. Gọi API lấy dữ liệu thật
+        fetchUserPlaylists();
+
         return recyclerView;
+    }
+
+    private void fetchUserPlaylists() {
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+
+        // Sau này làm Login xong sẽ thay bằng ID người dùng thật
+        Long fakeUserId = 1L;
+
+        apiService.getUserPlaylists(fakeUserId).enqueue(new Callback<List<Playlist>>() {
+            @Override
+            public void onResponse(Call<List<Playlist>> call, Response<List<Playlist>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    playlistList.clear();
+                    playlistList.addAll(response.body());
+                    adapter.notifyDataSetChanged(); // Cập nhật list
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Playlist>> call, Throwable t) {
+                Log.e("API_PLAYLIST", "Lỗi: " + t.getMessage());
+            }
+        });
+    }
+
+    // Load lại khi quay lại màn hình
+    @Override
+    public void onResume() {
+        super.onResume();
+        fetchUserPlaylists();
     }
 }

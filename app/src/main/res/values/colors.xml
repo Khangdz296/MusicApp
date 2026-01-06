@@ -40,5 +40,8 @@
     <color name="warning">#FF9800</color>
 
     <color name="text_input_box_stroke">#4CAF50</color>
+    <color name="spotify_gray">#B3B3B3</color>
+    <color name="spotify_light_gray">#E5E5E5</color>
+
 
 </resources>
