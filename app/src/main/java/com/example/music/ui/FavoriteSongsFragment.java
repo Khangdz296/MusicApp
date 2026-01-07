@@ -1,6 +1,8 @@
 package com.example.music.ui;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -37,10 +39,11 @@ public class FavoriteSongsFragment extends Fragment {
     private AddToPlaylistHelper addToPlaylistHelper;
     private FavoriteHelper favoriteHelper; // 1. Khai báo
     private List<Song> listSong = new ArrayList<>();
+    private List<Long> likedSongIds = new ArrayList<>();
     private TextView tvEmptyNotify; // Thêm text thông báo nếu rỗng
 
     // Giả lập User ID (Sau này lấy từ SharedPreferences khi login xong)
-    private Long currentUserId = 1L;
+    private Long currentUserId;
 
     @Nullable
     @Override
@@ -99,14 +102,40 @@ public class FavoriteSongsFragment extends Fragment {
     }
 
     private void fetchFavoriteSongs() {
-        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+        // 👇 1. LẤY ID THẬT TỪ SHAREDPREFERENCES
+        SharedPreferences prefs = getContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+        long realUserId = prefs.getLong("user_id", -1L);
 
-        apiService.getFavoriteSongs(currentUserId).enqueue(new Callback<List<Song>>() {
+        // 👇 2. KIỂM TRA ĐĂNG NHẬP
+        if (realUserId == -1L) {
+            // Nếu chưa đăng nhập: Xóa sạch dữ liệu
+            listSong.clear();
+            likedSongIds.clear();
+            if (adapter != null) {
+                adapter.updateData(listSong);
+                adapter.setLikedSongIds(likedSongIds);
+            }
+            // Toast.makeText(getContext(), "Vui lòng đăng nhập để xem bài hát yêu thích", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // 👇 3. GỌI API VỚI ID THẬT
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+        apiService.getFavoriteSongs(realUserId).enqueue(new Callback<List<Song>>() {
             @Override
             public void onResponse(Call<List<Song>> call, Response<List<Song>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     listSong = response.body();
+
+                    // 👇 CẬP NHẬT LIST ID ĐỂ ADAPTER BIẾT LÀ TIM ĐỎ
+                    likedSongIds.clear();
+                    for (Song s : listSong) {
+                        likedSongIds.add(s.getId());
+                    }
+
+                    // Cập nhật Adapter
                     adapter.updateData(listSong);
+                    adapter.setLikedSongIds(likedSongIds); // 👈 Quan trọng: Để hiện tim đỏ
 
                     Log.d("FAV_API", "Lấy được " + listSong.size() + " bài yêu thích.");
                 } else {
@@ -117,7 +146,6 @@ public class FavoriteSongsFragment extends Fragment {
             @Override
             public void onFailure(Call<List<Song>> call, Throwable t) {
                 Log.e("FAV_API", "Lỗi kết nối: " + t.getMessage());
-                // Toast.makeText(getContext(), "Lỗi tải bài hát yêu thích", Toast.LENGTH_SHORT).show();
             }
         });
     }

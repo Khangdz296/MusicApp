@@ -77,8 +77,32 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
+        handleIntent(getIntent());
+    }
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent); // Cập nhật intent hiện tại
+        handleIntent(intent); // Xử lý logic chuyển tab
     }
 
+    // 👇 LOGIC CHUYỂN TAB DỰA TRÊN "open_fragment"
+    private void handleIntent(Intent intent) {
+        if (intent != null && intent.hasExtra("open_fragment")) {
+            String fragmentToOpen = intent.getStringExtra("open_fragment");
+
+            if ("playlist".equals(fragmentToOpen)) {
+                // Tự động bấm vào nút Library trên BottomNavigation
+                // Nó sẽ kích hoạt listener bên trên và mở LibraryFragment (chứa Playlist)
+                bottomNavigationView.setSelectedItemId(R.id.nav_library);
+            }
+            else if ("favorite".equals(fragmentToOpen)) {
+                // Tương tự, mở LibraryFragment
+                // (Nếu muốn mở đúng tab Favorite bên trong Library, ta cần gửi thêm dữ liệu vào Fragment sau)
+                bottomNavigationView.setSelectedItemId(R.id.nav_library);
+            }
+        }
+    }
     private void loadFragment(Fragment fragment) {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_container, fragment)

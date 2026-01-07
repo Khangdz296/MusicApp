@@ -35,6 +35,7 @@ public class CategoryDetailActivity extends AppCompatActivity {
     private ImageView btnBack;
     private AddToPlaylistHelper addToPlaylistHelper;
     private MiniPlayerManager miniPlayerManager;
+    private List<Long> likedSongIds = new ArrayList<>();
 
     private List<Song> currentSongList = new ArrayList<>();
 
@@ -99,6 +100,21 @@ public class CategoryDetailActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<List<Song>> call, Throwable t) {
                 Toast.makeText(CategoryDetailActivity.this, "Không tải được bài hát", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // 👇 GỌI 1 DÒNG LÀ XONG (Helper lo hết)
+        favoriteHelper.getLikedSongIds(ids -> {
+            // Cập nhật list ID vào biến cục bộ
+            this.likedSongIds = ids;
+
+            // Cập nhật Adapter
+            if (songAdapter != null) {
+                songAdapter.setLikedSongIds(ids);
             }
         });
     }

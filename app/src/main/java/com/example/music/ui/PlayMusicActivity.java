@@ -2,6 +2,7 @@ package com.example.music.ui;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -10,6 +11,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.music.R;
@@ -33,10 +35,7 @@ public class PlayMusicActivity extends AppCompatActivity {
     private FavoriteHelper favoriteHelper;
     private List<Long> likedSongIds = new ArrayList<>();
     private static final String TAG = "PlayMusicActivity";
-    private Long currentUserId = 1L;
     private Song currentSong;
-
-
 
     ImageButton btnBack, btnMore, btnLike, btnShuffle, btnPrevious, btnPlay, btnNext, btnRepeat;
     ImageView imgAlbum;
@@ -54,17 +53,14 @@ public class PlayMusicActivity extends AppCompatActivity {
         setContentView(R.layout.layout_screen_huy);
 
         miniPlayerManager = MiniPlayerManager.getInstance();
-        // 3. Khởi tạo Helper
         addToPlaylistHelper = new AddToPlaylistHelper(this);
         favoriteHelper = new FavoriteHelper(this);
         initViews();
 
-        // Kiểm tra xem có phải là request phát bài MỚI không
         Intent intent = getIntent();
         boolean isNewSongRequest = intent.getBooleanExtra("play_new_song", false);
 
         if (isNewSongRequest && intent.hasExtra("song_data")) {
-            // CHỈ phát bài mới khi có flag "play_new_song" = true
             Song song = (Song) intent.getSerializableExtra("song_data");
             List<Song> songList = (ArrayList<Song>) intent.getSerializableExtra("song_list");
             int position = intent.getIntExtra("current_position", 0);
@@ -72,7 +68,6 @@ public class PlayMusicActivity extends AppCompatActivity {
             miniPlayerManager.playSong(song, songList, position);
             Log.d(TAG, "Playing new song from Intent");
         } else {
-            // Chỉ đồng bộ UI với trạng thái hiện tại, KHÔNG phát lại
             Log.d(TAG, "Opening full player - syncing UI only");
         }
 
@@ -99,26 +94,37 @@ public class PlayMusicActivity extends AppCompatActivity {
         txtDuration = findViewById(R.id.txtDuration);
         seekBar = findViewById(R.id.seekBar);
     }
-    // 👇 2. HÀM GỌI API LẤY DANH SÁCH YÊU THÍCH
+
     private void fetchUserFavorites() {
+        SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        long realUserId = prefs.getLong("user_id", -1L);
+
+        if (realUserId == -1L) {
+            likedSongIds.clear();
+            syncUIWithMiniPlayer();
+            return;
+        }
+
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
-        apiService.getFavoriteSongs(currentUserId).enqueue(new Callback<List<Song>>() {
+        apiService.getFavoriteSongs(realUserId).enqueue(new Callback<List<Song>>() {
             @Override
             public void onResponse(Call<List<Song>> call, Response<List<Song>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     likedSongIds.clear();
-                    // Chỉ lấy ID đưa vào list
                     for (Song s : response.body()) {
                         likedSongIds.add(s.getId());
                     }
-                    // Sau khi có dữ liệu thì cập nhật lại giao diện ngay
-                    syncUIWithMiniPlayer();
+                } else {
+                    likedSongIds.clear();
                 }
+                syncUIWithMiniPlayer();
             }
 
             @Override
             public void onFailure(Call<List<Song>> call, Throwable t) {
                 Log.e(TAG, "Lỗi lấy favorites: " + t.getMessage());
+                likedSongIds.clear();
+                syncUIWithMiniPlayer();
             }
         });
     }
@@ -130,7 +136,6 @@ public class PlayMusicActivity extends AppCompatActivity {
             return;
         }
 
-        // Hiển thị thông tin bài hát
         txtTitle.setText(currentSong.getTitle());
         txtSong.setText(currentSong.getTitle());
         if (currentSong.getArtist() != null) {
@@ -145,20 +150,11 @@ public class PlayMusicActivity extends AppCompatActivity {
                 .error(R.drawable.ic_music_note)
                 .into(imgAlbum);
 
-        // Cập nhật nút Play/Pause
-        btnPlay.setImageResource(miniPlayerManager.isPlaying() ?
-                R.drawable.ic_pause : R.drawable.ic_play);
+        btnPlay.setImageResource(miniPlayerManager.isPlaying() ? R.drawable.ic_pause : R.drawable.ic_play);
 
-        // Cập nhật nút Shuffle
         updateShuffleButton();
-
-        // Cập nhật nút Repeat
         updateRepeatButton();
-
-        // Reset flag khi sync UI mới
         isDurationSet = false;
-
-        // Thử set duration ngay lập tức
         trySetDuration();
     }
 
@@ -167,15 +163,11 @@ public class PlayMusicActivity extends AppCompatActivity {
         if (mp != null) {
             try {
                 int duration = mp.getDuration();
-                // Kiểm tra duration hợp lệ (> 0)
                 if (duration > 0) {
                     seekBar.setMax(duration);
                     txtDuration.setText(formatTime(duration));
                     isDurationSet = true;
-                    Log.d(TAG, "Duration set successfully: " + duration);
                 } else {
-                    Log.d(TAG, "Invalid duration: " + duration);
-                    // Set giá trị mặc định tạm thời
                     seekBar.setMax(100);
                     txtDuration.setText("--:--");
                 }
@@ -188,7 +180,8 @@ public class PlayMusicActivity extends AppCompatActivity {
             seekBar.setMax(100);
             txtDuration.setText("--:--");
         }
-        if (likedSongIds.contains(currentSong.getId())) {
+
+        if (currentSong != null && likedSongIds.contains(currentSong.getId())) {
             btnLike.setImageResource(R.drawable.ic_heart_filled);
             btnLike.setColorFilter(Color.RED);
         } else {
@@ -200,28 +193,34 @@ public class PlayMusicActivity extends AppCompatActivity {
     private void setupListeners() {
         btnBack.setOnClickListener(v -> finish());
 
-        // --- ĐOẠN CODE MỚI CHO btnMore ---
         btnMore.setOnClickListener(v -> {
-            // Lấy bài hát đang phát hiện tại
-            Song currentSong = miniPlayerManager.getCurrentSong();
-
-            if (currentSong != null) {
-                // Gọi BottomSheet "Thêm vào Playlist" lên
-                addToPlaylistHelper.showAddToPlaylistDialog(currentSong);
-            }
-        });
-        btnLike.setOnClickListener(v -> {
-            Song currentSong = miniPlayerManager.getCurrentSong();
-            if (currentSong != null) {
-                // Gọi Helper để xử lý Thích/Bỏ thích
-                favoriteHelper.toggleFavorite(currentSong, btnLike, likedSongIds);
-            }
-        });
-        btnPlay.setOnClickListener(v -> {
-            if (miniPlayerManager.isPreparing()) {
+            SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+            if (prefs.getLong("user_id", -1L) == -1L) {
+                Toast.makeText(this, "Vui lòng đăng nhập để thêm vào playlist!", Toast.LENGTH_SHORT).show();
                 return;
             }
 
+            Song currentSong = miniPlayerManager.getCurrentSong();
+            if (currentSong != null) {
+                addToPlaylistHelper.showAddToPlaylistDialog(currentSong);
+            }
+        });
+
+        btnLike.setOnClickListener(v -> {
+            SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+            if (prefs.getLong("user_id", -1L) == -1L) {
+                Toast.makeText(this, "Vui lòng đăng nhập để thích bài hát!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            Song currentSong = miniPlayerManager.getCurrentSong();
+            if (currentSong != null) {
+                favoriteHelper.toggleFavorite(currentSong, btnLike, likedSongIds);
+            }
+        });
+
+        btnPlay.setOnClickListener(v -> {
+            if (miniPlayerManager.isPreparing()) return;
             if (miniPlayerManager.isPlaying()) {
                 miniPlayerManager.pauseMusic();
             } else {
@@ -231,20 +230,14 @@ public class PlayMusicActivity extends AppCompatActivity {
         });
 
         btnNext.setOnClickListener(v -> {
-            if (miniPlayerManager.isPreparing()) {
-                return;
-            }
-
+            if (miniPlayerManager.isPreparing()) return;
             miniPlayerManager.playNext();
             isDurationSet = false;
             syncUIWithMiniPlayer();
         });
 
         btnPrevious.setOnClickListener(v -> {
-            if (miniPlayerManager.isPreparing()) {
-                return;
-            }
-
+            if (miniPlayerManager.isPreparing()) return;
             miniPlayerManager.playPrevious();
             isDurationSet = false;
             syncUIWithMiniPlayer();
@@ -298,7 +291,6 @@ public class PlayMusicActivity extends AppCompatActivity {
 
     private void updateRepeatButton() {
         int repeatMode = miniPlayerManager.getRepeatMode();
-
         switch (repeatMode) {
             case MiniPlayerManager.REPEAT_OFF:
                 btnRepeat.setImageResource(R.drawable.repeat);
@@ -318,24 +310,20 @@ public class PlayMusicActivity extends AppCompatActivity {
     private void updateSeekBar() {
         MediaPlayer mp = miniPlayerManager.getMediaPlayer();
 
-        // Nếu chưa set duration và MediaPlayer đã sẵn sàng, thử set lại
         if (!isDurationSet && mp != null) {
             trySetDuration();
         }
 
         if (!isUpdatingSeekBar && mp != null) {
             try {
-                // Kiểm tra MediaPlayer đang trong trạng thái hợp lệ
                 if (miniPlayerManager.isPlaying() || mp.getCurrentPosition() > 0) {
                     int currentPosition = mp.getCurrentPosition();
                     int duration = mp.getDuration();
 
-                    // Cập nhật SeekBar
                     if (duration > 0) {
                         seekBar.setProgress(currentPosition);
                         txtCurrent.setText(formatTime(currentPosition));
 
-                        // Set duration nếu chưa set hoặc bị sai
                         if (!isDurationSet || seekBar.getMax() != duration) {
                             seekBar.setMax(duration);
                             txtDuration.setText(formatTime(duration));
@@ -348,16 +336,13 @@ public class PlayMusicActivity extends AppCompatActivity {
             }
         }
 
-        // Cập nhật nút play/pause
-        btnPlay.setImageResource(miniPlayerManager.isPlaying() ?
-                R.drawable.ic_pause : R.drawable.ic_play);
+        btnPlay.setImageResource(miniPlayerManager.isPlaying() ? R.drawable.ic_pause : R.drawable.ic_play);
 
         handler.postDelayed(this::updateSeekBar, 100);
     }
 
     private String formatTime(int millis) {
         if (millis < 0) return "0:00";
-
         int seconds = (millis / 1000) % 60;
         int minutes = (millis / (1000 * 60)) % 60;
         return String.format("%d:%02d", minutes, seconds);
@@ -374,6 +359,7 @@ public class PlayMusicActivity extends AppCompatActivity {
         super.onResume();
         isDurationSet = false;
         syncUIWithMiniPlayer();
+        fetchUserFavorites();
     }
 
     @Override

@@ -1,6 +1,8 @@
 package com.example.music.ui;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -62,12 +64,25 @@ public class MyPlaylistsFragment extends Fragment {
     }
 
     private void fetchUserPlaylists() {
+        // 👇 1. LẤY ID THẬT TỪ SHAREDPREFERENCES
+        SharedPreferences prefs = getContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+        long realUserId = prefs.getLong("user_id", -1L);
+
+        // 👇 2. KIỂM TRA ĐĂNG NHẬP
+        if (realUserId == -1L) {
+            // Nếu chưa đăng nhập: Xóa list cũ đi (tránh hiện dữ liệu rác)
+            if (adapter != null) {
+                adapter.setData(new ArrayList<>());
+            }
+            // Có thể hiện Toast nhắc nhở nếu cần
+            // Toast.makeText(getContext(), "Vui lòng đăng nhập để xem Playlist của bạn", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
 
-        // Sau này làm Login xong sẽ thay bằng ID người dùng thật
-        Long fakeUserId = 1L;
-
-        apiService.getUserPlaylists(fakeUserId).enqueue(new Callback<List<Playlist>>() {
+        // 👇 3. GỌI API VỚI ID THẬT
+        apiService.getUserPlaylists(realUserId).enqueue(new Callback<List<Playlist>>() {
             @Override
             public void onResponse(Call<List<Playlist>> call, Response<List<Playlist>> response) {
                 if (response.isSuccessful() && response.body() != null) {
