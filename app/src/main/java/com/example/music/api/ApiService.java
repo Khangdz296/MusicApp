@@ -136,4 +136,6 @@ public interface ApiService {
     // 4. Xóa bài hát khỏi Playlist
     @DELETE("api/playlists/{playlistId}/remove-song/{songId}")
     Call<Playlist> removeSongFromPlaylist(@Path("playlistId") Long playlistId, @Path("songId") Long songId);
+    @POST("api/songs/{id}/view")
+    Call<Void> incrementView(@Path("id") Long songId);
 }
