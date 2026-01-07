@@ -12,51 +12,50 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.music.R;
-import com.example.music.adapter.AlbumSongAdapter; // 👇 Dùng Adapter mới
+import com.example.music.adapter.AlbumSongAdapter;
 import com.example.music.model.Album;
 import com.example.music.model.Song;
+import com.example.music.utils.MiniPlayerManager;
 
 import java.util.ArrayList;
 import java.util.List;
 import com.example.music.ui.AddToPlaylistHelper;
+
 public class AlbumDetailActivity extends AppCompatActivity {
     private AddToPlaylistHelper addToPlaylistHelper;
-    private FavoriteHelper favoriteHelper; // 👇 1. Khai báo Helper
+    private FavoriteHelper favoriteHelper;
+    private MiniPlayerManager miniPlayerManager;
     private Long currentUserId = 1L;
     private List<Long> likedSongIds = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_album_detail);
-        // 2. Khởi tạo Helper
+
         addToPlaylistHelper = new AddToPlaylistHelper(this);
         favoriteHelper = new FavoriteHelper(this);
-        // 👇 1. ẨN ACTION BAR MẶC ĐỊNH
-        // (Vì layout XML của mình đã có Header đẹp và nút Back riêng rồi)
+        miniPlayerManager = MiniPlayerManager.getInstance();
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
 
-        // 👇 2. ÁNH XẠ CÁC VIEW (Khớp với ID trong XML mới nhất)
-        ImageView btnBack = findViewById(R.id.btnBack);       // Nút quay lại
-        ImageView imgCover = findViewById(R.id.imgAlbumCover); // Ảnh bìa to
-        TextView tvName = findViewById(R.id.tvAlbumName);     // Tên Album
-        TextView tvArtist = findViewById(R.id.tvArtistName);   // Tên Ca sĩ
-        RecyclerView rvSongs = findViewById(R.id.rvSongs);    // List nhạc
+        ImageView btnBack = findViewById(R.id.btnBack);
+        ImageView imgCover = findViewById(R.id.imgAlbumCover);
+        TextView tvName = findViewById(R.id.tvAlbumName);
+        TextView tvArtist = findViewById(R.id.tvArtistName);
+        RecyclerView rvSongs = findViewById(R.id.rvSongs);
 
-        // 👇 3. XỬ LÝ SỰ KIỆN NÚT BACK (QUAN TRỌNG)
         btnBack.setOnClickListener(v -> {
-            onBackPressed(); // Quay lại màn hình trước
+            onBackPressed();
         });
 
-        // 4. NHẬN DỮ LIỆU TỪ INTENT
         Album album = (Album) getIntent().getSerializableExtra("ALBUM_DATA");
 
         if (album != null) {
-            // Hiển thị thông tin lên Header
             tvName.setText(album.getName());
 
-            // Check null cho an toàn
             if (album.getArtist() != null) {
                 tvArtist.setText(album.getArtist().getName());
             } else {
@@ -68,25 +67,23 @@ public class AlbumDetailActivity extends AppCompatActivity {
                     .placeholder(R.drawable.ic_launcher_background)
                     .into(imgCover);
 
-            // Lấy danh sách bài hát
             List<Song> songs = album.getSongs();
             if (songs == null) songs = new ArrayList<>();
 
-            List<Song> finalSongs = songs; // Lưu biến final để dùng trong lambda
+            List<Song> finalSongs = songs;
 
             AlbumSongAdapter adapter = new AlbumSongAdapter(songs, new AlbumSongAdapter.OnItemClickListener() {
                 @Override
                 public void onItemClick(Song song) {
-                    int position = finalSongs.indexOf(song); // ✅ Tìm vị trí bài hát
-
-                    Intent intent = new Intent(AlbumDetailActivity.this, PlayMusicActivity.class);
-                    intent.putExtra("song_data", song);
-                    intent.putExtra("current_position", position);        // ✅ Thêm vị trí
-                    intent.putExtra("song_list", new ArrayList<>(finalSongs)); // ✅ Thêm danh sách
-                    startActivity(intent);
+                    // 👇 SỬ DỤNG MINI PLAYER thay vì mở PlayMusicActivity
+                    int position = finalSongs.indexOf(song);
+                    miniPlayerManager.playSong(song, finalSongs, position);
                 }
+
                 @Override
-                public void onAddToPlaylistClick(Song song) {addToPlaylistHelper.showAddToPlaylistDialog(song);}
+                public void onAddToPlaylistClick(Song song) {
+                    addToPlaylistHelper.showAddToPlaylistDialog(song);
+                }
 
                 @Override
                 public void onFavoriteClick(Song song, ImageView btnFavorite, List<Long> likedIds) {
@@ -94,9 +91,8 @@ public class AlbumDetailActivity extends AppCompatActivity {
                 }
             });
 
-            rvSongs.setLayoutManager(new LinearLayoutManager(this)); // Xếp dọc
+            rvSongs.setLayoutManager(new LinearLayoutManager(this));
             rvSongs.setAdapter(adapter);
         }
-
     }
 }
