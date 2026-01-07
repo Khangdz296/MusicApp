@@ -16,12 +16,18 @@ import com.bumptech.glide.Glide;
 import com.example.music.R;
 import com.example.music.model.Song;
 import com.example.music.ui.PlayMusicActivity;
+import com.example.music.api.ApiService;
+import com.example.music.api.RetrofitClient;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MiniPlayerManager {
 
@@ -60,6 +66,7 @@ public class MiniPlayerManager {
     private Handler timeoutHandler = new Handler();
     private Runnable timeoutRunnable;
     private Context context;
+    private ApiService apiService;
 
     // Callback listener
     public interface OnPlayerStateListener {
@@ -90,6 +97,8 @@ public class MiniPlayerManager {
         btnMiniPlay = miniPlayerView.findViewById(R.id.btnMiniPlay);
         btnMiniNext = miniPlayerView.findViewById(R.id.btnMiniNext);
         miniProgressBar = miniPlayerView.findViewById(R.id.miniProgressBar);
+
+        apiService = RetrofitClient.getClient().create(ApiService.class);
 
         setupListeners();
         Log.d(TAG, "Mini Player initialized");
@@ -176,6 +185,11 @@ public class MiniPlayerManager {
                 hideLoadingState();
                 playMusic();
 
+                // Gọi API tăng view
+                if (currentSong != null && currentSong.getId() != null) {
+                    incrementViewCount(currentSong.getId());
+                }
+
                 // Thông báo đã chuẩn bị xong
                 if (playerStateListener != null) {
                     playerStateListener.onPrepared();
@@ -219,6 +233,24 @@ public class MiniPlayerManager {
             hideLoadingState();
             handlePrepareError();
         }
+    }
+
+    private void incrementViewCount(Long songId) {
+        if (apiService == null) return;
+
+        apiService.incrementView(songId).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Log.d(TAG, "View count updated for song: " + songId);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Log.e(TAG, "Failed to update view count: " + t.getMessage());
+            }
+        });
     }
 
     private void startTimeout() {
