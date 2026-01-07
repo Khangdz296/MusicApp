@@ -18,14 +18,15 @@ import com.example.music.model.Song;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import com.example.music.ui.AddToPlaylistHelper;
 public class AlbumDetailActivity extends AppCompatActivity {
-
+    private AddToPlaylistHelper addToPlaylistHelper;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_album_detail);
-
+        // 2. Khởi tạo Helper
+        addToPlaylistHelper = new AddToPlaylistHelper(this);
         // 👇 1. ẨN ACTION BAR MẶC ĐỊNH
         // (Vì layout XML của mình đã có Header đẹp và nút Back riêng rồi)
         if (getSupportActionBar() != null) {
@@ -80,6 +81,8 @@ public class AlbumDetailActivity extends AppCompatActivity {
                     intent.putExtra("song_list", new ArrayList<>(finalSongs)); // ✅ Thêm danh sách
                     startActivity(intent);
                 }
+                @Override
+                public void onAddToPlaylistClick(Song song) {addToPlaylistHelper.showAddToPlaylistDialog(song);}
             });
 
             rvSongs.setLayoutManager(new LinearLayoutManager(this)); // Xếp dọc

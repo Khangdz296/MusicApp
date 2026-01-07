@@ -30,7 +30,7 @@ public class PlaylistDetailActivity extends AppCompatActivity {
     private RecyclerView rvSongs;
     private FloatingActionButton fabPlay;
     private MiniPlayerManager miniPlayerManager;
-
+    private AddToPlaylistHelper addToPlaylistHelper;
     private Playlist mPlaylist;
     private SongAdapterK songAdapter;
 
@@ -38,12 +38,13 @@ public class PlaylistDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_playlist_detail); // File XML của bạn
-
+        addToPlaylistHelper = new AddToPlaylistHelper(this);
         // 1. Nhận dữ liệu từ màn hình trước
         mPlaylist = (Playlist) getIntent().getSerializableExtra("object_playlist");
 
         initViews();
         setupData();
+
     }
 
     private void initViews() {
@@ -80,6 +81,11 @@ public class PlaylistDetailActivity extends AppCompatActivity {
                 intent.putExtra("song_list", new ArrayList<>(mPlaylist.getSongs()));
                 intent.putExtra("current_position", position);
                 startActivity(intent);
+            }
+            @Override
+            public void onAddToPlaylistClick(Song song) {
+                // XỬ LÝ KHI BẤM NÚT CỘNG -> Hiện BottomSheet
+                addToPlaylistHelper.showAddToPlaylistDialog(song);
             }
         });
         rvSongs.setAdapter(songAdapter);

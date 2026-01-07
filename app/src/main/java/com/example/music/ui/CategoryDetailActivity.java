@@ -23,7 +23,7 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
+import com.example.music.ui.AddToPlaylistHelper;
 public class CategoryDetailActivity extends AppCompatActivity {
 
     private RecyclerView rcvSongs;
@@ -31,7 +31,7 @@ public class CategoryDetailActivity extends AppCompatActivity {
     private TextView tvTitle;
     private View viewHeader;
     private ImageView btnBack;
-
+    private AddToPlaylistHelper addToPlaylistHelper;
     // 👇 Lưu danh sách bài hát để truyền sang PlayMusicActivity
     private List<Song> currentSongList = new ArrayList<>();
 
@@ -39,7 +39,8 @@ public class CategoryDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_category_detail_khang);
-
+        // 2. Khởi tạo Helper (truyền Context vào)
+        addToPlaylistHelper = new AddToPlaylistHelper(this);
         // 1. Ánh xạ
         tvTitle = findViewById(R.id.tvCategoryTitleDetail);
         viewHeader = findViewById(R.id.viewHeaderBackground);
@@ -70,6 +71,10 @@ public class CategoryDetailActivity extends AppCompatActivity {
                 intent.putExtra("current_position", position);
                 intent.putExtra("song_list", new ArrayList<>(currentSongList));
                 startActivity(intent);
+            }
+            @Override
+            public void onAddToPlaylistClick(Song song) {
+                addToPlaylistHelper.showAddToPlaylistDialog(song);
             }
         });
         rcvSongs.setAdapter(songAdapter);

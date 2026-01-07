@@ -22,6 +22,7 @@ public class AlbumSongAdapter extends RecyclerView.Adapter<AlbumSongAdapter.View
 
     public interface OnItemClickListener {
         void onItemClick(Song song);
+        void onAddToPlaylistClick(Song song);
     }
 
     public AlbumSongAdapter(List<Song> list, OnItemClickListener listener) {
@@ -56,11 +57,14 @@ public class AlbumSongAdapter extends RecyclerView.Adapter<AlbumSongAdapter.View
                 .load(song.getImageUrl())
                 .placeholder(R.drawable.ic_launcher_background)
                 .into(holder.imgCover);
-
+        holder.btnAddToPlaylist.setOnClickListener(v -> {
+            listener.onAddToPlaylistClick(song);
+        });
         // Sự kiện click
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onItemClick(song);
         });
+
     }
 
     @Override
@@ -72,7 +76,7 @@ public class AlbumSongAdapter extends RecyclerView.Adapter<AlbumSongAdapter.View
         // Khai báo biến
         ImageView imgCover, btnHeart, btnAdd;
         TextView tvName, tvArtist;
-
+        ImageView btnAddToPlaylist;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
@@ -83,7 +87,7 @@ public class AlbumSongAdapter extends RecyclerView.Adapter<AlbumSongAdapter.View
             tvName   = itemView.findViewById(R.id.tvSongName);     // XML đặt là tvSongName
             tvArtist = itemView.findViewById(R.id.tvArtist);       // XML đặt là tvArtist
             btnHeart = itemView.findViewById(R.id.btnFavorite);    // XML đặt là btnFavorite
-            btnAdd   = itemView.findViewById(R.id.btnAddToPlaylist); // XML đặt là btnAddToPlaylist
+            btnAddToPlaylist   = itemView.findViewById(R.id.btnAddToPlaylist); // XML đặt là btnAddToPlaylist
         }
     }
 }

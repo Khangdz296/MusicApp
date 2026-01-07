@@ -27,7 +27,7 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
+import com.example.music.ui.AddToPlaylistHelper;
 public class ArtistDetailActivity extends AppCompatActivity {
 
     private ImageView imgArtist, btnBack;
@@ -38,12 +38,14 @@ public class ArtistDetailActivity extends AppCompatActivity {
     private SongAdapterK songAdapter;
     private AlbumAdapter albumAdapter;
     private ApiService apiService;
-
+    // 1. Khai báo Helper
+    private AddToPlaylistHelper addToPlaylistHelper;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_artist_detail);
-
+        //  Khởi tạo Helper (truyền Context vào)
+        addToPlaylistHelper = new AddToPlaylistHelper(this);
         // Khởi tạo ApiService
         apiService = RetrofitClient.getClient().create(ApiService.class);
 
@@ -104,12 +106,25 @@ public class ArtistDetailActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Song> songs = response.body();
                     if (songs.isEmpty()) return;
+                    songAdapter = new SongAdapterK(ArtistDetailActivity.this, songs, new SongAdapterK.OnSongClickListener() {
+                        @Override
+                        public void onSongClick(Song song) {
+                            Intent intent = new Intent(ArtistDetailActivity.this, PlayMusicActivity.class);
+                            intent.putExtra("song_data", song);
+                            intent.putExtra("song_list", new ArrayList<>(songs));
+                            startActivity(intent);
+                        }
 
-                    songAdapter = new SongAdapterK(ArtistDetailActivity.this, songs, song -> {
-                        Intent intent = new Intent(ArtistDetailActivity.this, PlayMusicActivity.class);
-                        intent.putExtra("song_data", song);
-                        intent.putExtra("song_list", new ArrayList<>(songs));
-                        startActivity(intent);
+                        @Override
+                        public void onAddToPlaylistClick(Song song) {
+                            // 3. GỌI HELPER ĐỂ HIỆN BOTTOM SHEET
+                            addToPlaylistHelper.showAddToPlaylistDialog(song);
+                        }
+//                    songAdapter = new SongAdapterK(ArtistDetailActivity.this, songs, song -> {
+//                        Intent intent = new Intent(ArtistDetailActivity.this, PlayMusicActivity.class);
+//                        intent.putExtra("song_data", song);
+//                        intent.putExtra("song_list", new ArrayList<>(songs));
+//                        startActivity(intent);
                     });
                     rvSongs.setAdapter(songAdapter);
                 }

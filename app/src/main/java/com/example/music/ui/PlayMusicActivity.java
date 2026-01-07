@@ -17,9 +17,9 @@ import com.example.music.utils.MiniPlayerManager;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import com.example.music.ui.AddToPlaylistHelper;
 public class PlayMusicActivity extends AppCompatActivity {
-
+    private AddToPlaylistHelper addToPlaylistHelper;
     private static final String TAG = "PlayMusicActivity";
 
     ImageButton btnBack, btnMore, btnLike, btnShuffle, btnPrevious, btnPlay, btnNext, btnRepeat;
@@ -38,7 +38,8 @@ public class PlayMusicActivity extends AppCompatActivity {
 
         // Lấy instance của Mini Player Manager
         miniPlayerManager = MiniPlayerManager.getInstance();
-
+        // 3. Khởi tạo Helper
+        addToPlaylistHelper = new AddToPlaylistHelper(this);
         initViews();
 
         // Kiểm tra xem có dữ liệu từ Intent không
@@ -125,6 +126,16 @@ public class PlayMusicActivity extends AppCompatActivity {
     private void setupListeners() {
         btnBack.setOnClickListener(v -> finish());
 
+        // --- ĐOẠN CODE MỚI CHO btnMore ---
+        btnMore.setOnClickListener(v -> {
+            // Lấy bài hát đang phát hiện tại
+            Song currentSong = miniPlayerManager.getCurrentSong();
+
+            if (currentSong != null) {
+                // Gọi BottomSheet "Thêm vào Playlist" lên
+                addToPlaylistHelper.showAddToPlaylistDialog(currentSong);
+            }
+        });
         btnPlay.setOnClickListener(v -> {
             if (miniPlayerManager.isPlaying()) {
                 miniPlayerManager.pauseMusic();
