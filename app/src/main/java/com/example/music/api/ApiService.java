@@ -152,4 +152,6 @@ public interface ApiService {
     // 4. Check đã like chưa
     @GET("api/favorites/{userId}/check/{songId}")
     Call<Boolean> isSongLiked(@Path("userId") Long userId, @Path("songId") Long songId);
+    @POST("api/songs/{id}/view")
+    Call<Void> incrementView(@Path("id") Long songId);
 }

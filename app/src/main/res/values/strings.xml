@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Music</string>
+    <string name="loading_song">Đang tải bài hát...</string>
+    <string name="network_error">Lỗi kết nối mạng</string>
+    <string name="retrying">Đang thử lại...</string>
+    <string name="max_retry_reached">Không thể phát nhạc. Kiểm tra kết nối.</string>
 </resources>

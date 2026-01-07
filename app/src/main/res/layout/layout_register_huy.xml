@@ -98,6 +98,21 @@
             android:layout_marginEnd="24dp"
             android:layout_marginTop="16dp" />
 
+        <TextView
+            android:id="@+id/txtPasswordNote"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="• Mật khẩu phải có tối thiểu 6 ký tự"
+            android:textColor="#D0CDCD"
+            android:textSize="12sp"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginTop="6dp"
+            app:layout_constraintTop_toBottomOf="@id/edtPassword"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+
         <ImageButton
             android:id="@+id/btnSubmit"
             android:layout_width="70dp"
