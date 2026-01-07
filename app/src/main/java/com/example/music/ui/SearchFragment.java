@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,8 +46,9 @@ public class SearchFragment extends Fragment {
     private SongAdapterK songAdapter;
     private MiniPlayerManager miniPlayerManager;
     private AddToPlaylistHelper addToPlaylistHelper;
-    // Lưu danh sách kết quả tìm kiếm
+    private FavoriteHelper favoriteHelper; // 1. Khai báo
     private List<Song> searchResultList = new ArrayList<>();
+    private List<Long> myLikedIds = new ArrayList<>();
 
     @Nullable
     @Override
@@ -57,6 +59,7 @@ public class SearchFragment extends Fragment {
         miniPlayerManager = MiniPlayerManager.getInstance();
         // 2. Khởi tạo Helper (truyền Context vào)
         addToPlaylistHelper = new AddToPlaylistHelper(getContext());
+        favoriteHelper = new FavoriteHelper(getContext()); // 2. Khởi tạo
         // 1. Ánh xạ View
         rcvCategories = view.findViewById(R.id.rcvCategories);
         rcvSearchResults = view.findViewById(R.id.rcvSearchResults);
@@ -107,6 +110,11 @@ public class SearchFragment extends Fragment {
             public void onAddToPlaylistClick(Song song) {
                 // 3. GỌI HELPER ĐỂ HIỆN BOTTOM SHEET
                 addToPlaylistHelper.showAddToPlaylistDialog(song);
+            }
+            @Override
+            public void onFavoriteClick(Song song, ImageView btnFavorite, List<Long> ids) {
+                // 👇 GỌI HELPER VỚI DANH SÁCH ID
+                favoriteHelper.toggleFavorite(song, btnFavorite, ids);
             }
         });
         rcvSearchResults.setAdapter(songAdapter);

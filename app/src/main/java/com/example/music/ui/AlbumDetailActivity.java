@@ -21,12 +21,16 @@ import java.util.List;
 import com.example.music.ui.AddToPlaylistHelper;
 public class AlbumDetailActivity extends AppCompatActivity {
     private AddToPlaylistHelper addToPlaylistHelper;
+    private FavoriteHelper favoriteHelper; // 👇 1. Khai báo Helper
+    private Long currentUserId = 1L;
+    private List<Long> likedSongIds = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_album_detail);
         // 2. Khởi tạo Helper
         addToPlaylistHelper = new AddToPlaylistHelper(this);
+        favoriteHelper = new FavoriteHelper(this);
         // 👇 1. ẨN ACTION BAR MẶC ĐỊNH
         // (Vì layout XML của mình đã có Header đẹp và nút Back riêng rồi)
         if (getSupportActionBar() != null) {
@@ -83,10 +87,16 @@ public class AlbumDetailActivity extends AppCompatActivity {
                 }
                 @Override
                 public void onAddToPlaylistClick(Song song) {addToPlaylistHelper.showAddToPlaylistDialog(song);}
+
+                @Override
+                public void onFavoriteClick(Song song, ImageView btnFavorite, List<Long> likedIds) {
+                    favoriteHelper.toggleFavorite(song, btnFavorite, likedIds);
+                }
             });
 
             rvSongs.setLayoutManager(new LinearLayoutManager(this)); // Xếp dọc
             rvSongs.setAdapter(adapter);
         }
+
     }
 }

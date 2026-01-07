@@ -33,7 +33,7 @@ public class ArtistDetailActivity extends AppCompatActivity {
     private ImageView imgArtist, btnBack;
     private TextView tvArtistName, tvDescription;
     private RecyclerView rvSongs, rvAlbums;
-
+    private FavoriteHelper favoriteHelper; // 1. Khai báo
     private Artist artist;
     private SongAdapterK songAdapter;
     private AlbumAdapter albumAdapter;
@@ -46,6 +46,7 @@ public class ArtistDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_artist_detail);
         //  Khởi tạo Helper (truyền Context vào)
         addToPlaylistHelper = new AddToPlaylistHelper(this);
+        favoriteHelper = new FavoriteHelper(this); // 2. Khởi tạo
         // Khởi tạo ApiService
         apiService = RetrofitClient.getClient().create(ApiService.class);
 
@@ -119,6 +120,11 @@ public class ArtistDetailActivity extends AppCompatActivity {
                         public void onAddToPlaylistClick(Song song) {
                             // 3. GỌI HELPER ĐỂ HIỆN BOTTOM SHEET
                             addToPlaylistHelper.showAddToPlaylistDialog(song);
+                        }
+                        @Override
+                        public void onFavoriteClick(Song song, ImageView btnFavorite, List<Long> ids) {
+                            // 👇 GỌI HELPER VỚI DANH SÁCH ID
+                            favoriteHelper.toggleFavorite(song, btnFavorite, ids);
                         }
 //                    songAdapter = new SongAdapterK(ArtistDetailActivity.this, songs, song -> {
 //                        Intent intent = new Intent(ArtistDetailActivity.this, PlayMusicActivity.class);

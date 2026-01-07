@@ -1,6 +1,7 @@
 package com.example.music.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import com.bumptech.glide.Glide;
 import com.example.music.R;
 import com.example.music.model.Song;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SongAdapterK extends RecyclerView.Adapter<SongAdapterK.SongViewHolder> {
@@ -21,9 +23,12 @@ public class SongAdapterK extends RecyclerView.Adapter<SongAdapterK.SongViewHold
     private List<Song> list;
     private OnSongClickListener listener;
 
+    private List<Long> likedSongIds = new ArrayList<>();
     public interface OnSongClickListener {
         void onSongClick(Song song);
         void onAddToPlaylistClick(Song song);
+
+        void onFavoriteClick(Song song, ImageView btnFavorite, List<Long> currentLikedIds);
     }
 
     public SongAdapterK(Context context, List<Song> list, OnSongClickListener listener) {
@@ -35,6 +40,10 @@ public class SongAdapterK extends RecyclerView.Adapter<SongAdapterK.SongViewHold
     public void updateData(List<Song> newList) {
         this.list = newList;
         notifyDataSetChanged();
+    }
+    public void setLikedSongIds(List<Long> likedSongIds) {
+        this.likedSongIds = likedSongIds;
+        notifyDataSetChanged(); // Load lại giao diện
     }
 
     @NonNull
@@ -64,6 +73,16 @@ public class SongAdapterK extends RecyclerView.Adapter<SongAdapterK.SongViewHold
                 .error(R.drawable.ic_launcher_background)
                 .into(holder.imgAlbum);
 
+        if (likedSongIds.contains(song.getId())) {
+            // Có ID trong bảng user_favorites -> TIM ĐỎ
+            holder.btnFavorite.setImageResource(R.drawable.ic_heart_filled);
+            holder.btnFavorite.setColorFilter(Color.RED);
+        } else {
+            // Không có -> TIM TRẮNG
+            holder.btnFavorite.setImageResource(R.drawable.ic_heart_outline);
+            holder.btnFavorite.setColorFilter(Color.GRAY);
+        }
+
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onSongClick(song);
@@ -74,6 +93,10 @@ public class SongAdapterK extends RecyclerView.Adapter<SongAdapterK.SongViewHold
                 // Khi bấm dấu cộng -> Gọi hàm này để Activity xử lý (hiện BottomSheet)
                 listener.onAddToPlaylistClick(song);
             }
+        });
+        // 3. Sự kiện click tim
+        holder.btnFavorite.setOnClickListener(v -> {
+            listener.onFavoriteClick(song, holder.btnFavorite, likedSongIds);
         });
     }
 

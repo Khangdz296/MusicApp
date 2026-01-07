@@ -136,6 +136,22 @@ public interface ApiService {
     // 4. Xóa bài hát khỏi Playlist
     @DELETE("api/playlists/{playlistId}/remove-song/{songId}")
     Call<Playlist> removeSongFromPlaylist(@Path("playlistId") Long playlistId, @Path("songId") Long songId);
+
+    // 1. Thêm vào yêu thích
+    @POST("api/favorites/{userId}/add/{songId}")
+    Call<Void> addFavorite(@Path("userId") Long userId, @Path("songId") Long songId);
+
+    // 2. Xóa khỏi yêu thích
+    @DELETE("api/favorites/{userId}/remove/{songId}")
+    Call<Void> removeFavorite(@Path("userId") Long userId, @Path("songId") Long songId);
+
+    // 3. Lấy danh sách yêu thích
+    @GET("api/favorites/{userId}")
+    Call<List<Song>> getFavoriteSongs(@Path("userId") Long userId);
+
+    // 4. Check đã like chưa
+    @GET("api/favorites/{userId}/check/{songId}")
+    Call<Boolean> isSongLiked(@Path("userId") Long userId, @Path("songId") Long songId);
     @POST("api/songs/{id}/view")
     Call<Void> incrementView(@Path("id") Long songId);
 }

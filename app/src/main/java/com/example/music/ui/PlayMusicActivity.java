@@ -13,15 +13,30 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.music.R;
+import com.example.music.api.ApiService;
+import com.example.music.api.RetrofitClient;
 import com.example.music.model.Song;
 import com.example.music.utils.MiniPlayerManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.example.music.ui.FavoriteHelper;
+import android.graphics.Color;
 import com.example.music.ui.AddToPlaylistHelper;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class PlayMusicActivity extends AppCompatActivity {
     private AddToPlaylistHelper addToPlaylistHelper;
+    private FavoriteHelper favoriteHelper;
+    private List<Long> likedSongIds = new ArrayList<>();
     private static final String TAG = "PlayMusicActivity";
+    private Long currentUserId = 1L;
+    private Song currentSong;
+
+
 
     ImageButton btnBack, btnMore, btnLike, btnShuffle, btnPrevious, btnPlay, btnNext, btnRepeat;
     ImageView imgAlbum;
@@ -41,6 +56,7 @@ public class PlayMusicActivity extends AppCompatActivity {
         miniPlayerManager = MiniPlayerManager.getInstance();
         // 3. Khởi tạo Helper
         addToPlaylistHelper = new AddToPlaylistHelper(this);
+        favoriteHelper = new FavoriteHelper(this);
         initViews();
 
         // Kiểm tra xem có phải là request phát bài MỚI không
@@ -83,9 +99,32 @@ public class PlayMusicActivity extends AppCompatActivity {
         txtDuration = findViewById(R.id.txtDuration);
         seekBar = findViewById(R.id.seekBar);
     }
+    // 👇 2. HÀM GỌI API LẤY DANH SÁCH YÊU THÍCH
+    private void fetchUserFavorites() {
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+        apiService.getFavoriteSongs(currentUserId).enqueue(new Callback<List<Song>>() {
+            @Override
+            public void onResponse(Call<List<Song>> call, Response<List<Song>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    likedSongIds.clear();
+                    // Chỉ lấy ID đưa vào list
+                    for (Song s : response.body()) {
+                        likedSongIds.add(s.getId());
+                    }
+                    // Sau khi có dữ liệu thì cập nhật lại giao diện ngay
+                    syncUIWithMiniPlayer();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Song>> call, Throwable t) {
+                Log.e(TAG, "Lỗi lấy favorites: " + t.getMessage());
+            }
+        });
+    }
 
     private void syncUIWithMiniPlayer() {
-        Song currentSong = miniPlayerManager.getCurrentSong();
+        currentSong = miniPlayerManager.getCurrentSong();
         if (currentSong == null) {
             finish();
             return;
@@ -149,6 +188,13 @@ public class PlayMusicActivity extends AppCompatActivity {
             seekBar.setMax(100);
             txtDuration.setText("--:--");
         }
+        if (likedSongIds.contains(currentSong.getId())) {
+            btnLike.setImageResource(R.drawable.ic_heart_filled);
+            btnLike.setColorFilter(Color.RED);
+        } else {
+            btnLike.setImageResource(R.drawable.ic_heart_outline);
+            btnLike.setColorFilter(Color.WHITE);
+        }
     }
 
     private void setupListeners() {
@@ -162,6 +208,13 @@ public class PlayMusicActivity extends AppCompatActivity {
             if (currentSong != null) {
                 // Gọi BottomSheet "Thêm vào Playlist" lên
                 addToPlaylistHelper.showAddToPlaylistDialog(currentSong);
+            }
+        });
+        btnLike.setOnClickListener(v -> {
+            Song currentSong = miniPlayerManager.getCurrentSong();
+            if (currentSong != null) {
+                // Gọi Helper để xử lý Thích/Bỏ thích
+                favoriteHelper.toggleFavorite(currentSong, btnLike, likedSongIds);
             }
         });
         btnPlay.setOnClickListener(v -> {

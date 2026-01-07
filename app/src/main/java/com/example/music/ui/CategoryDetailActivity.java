@@ -25,7 +25,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import com.example.music.ui.AddToPlaylistHelper;
 public class CategoryDetailActivity extends AppCompatActivity {
-
+    private FavoriteHelper favoriteHelper; // 1. Khai báo
     private RecyclerView rcvSongs;
     private SongAdapterK songAdapter;
     private TextView tvTitle;
@@ -41,6 +41,7 @@ public class CategoryDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_category_detail_khang);
         // 2. Khởi tạo Helper (truyền Context vào)
         addToPlaylistHelper = new AddToPlaylistHelper(this);
+        favoriteHelper = new FavoriteHelper(this); // 2. Khởi tạo
         // 1. Ánh xạ
         tvTitle = findViewById(R.id.tvCategoryTitleDetail);
         viewHeader = findViewById(R.id.viewHeaderBackground);
@@ -75,6 +76,11 @@ public class CategoryDetailActivity extends AppCompatActivity {
             @Override
             public void onAddToPlaylistClick(Song song) {
                 addToPlaylistHelper.showAddToPlaylistDialog(song);
+            }
+            @Override
+            public void onFavoriteClick(Song song, ImageView btnFavorite, List<Long> ids) {
+                // 👇 GỌI HELPER VỚI DANH SÁCH ID
+                favoriteHelper.toggleFavorite(song, btnFavorite, ids);
             }
         });
         rcvSongs.setAdapter(songAdapter);

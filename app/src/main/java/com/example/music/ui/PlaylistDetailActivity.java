@@ -22,6 +22,7 @@ import com.example.music.utils.MiniPlayerManager;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class PlaylistDetailActivity extends AppCompatActivity {
 
@@ -31,14 +32,17 @@ public class PlaylistDetailActivity extends AppCompatActivity {
     private FloatingActionButton fabPlay;
     private MiniPlayerManager miniPlayerManager;
     private AddToPlaylistHelper addToPlaylistHelper;
+    private FavoriteHelper favoriteHelper; // 1. Khai báo
     private Playlist mPlaylist;
     private SongAdapterK songAdapter;
+    private List<Long> myLikedIds = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_playlist_detail); // File XML của bạn
         addToPlaylistHelper = new AddToPlaylistHelper(this);
+        favoriteHelper = new FavoriteHelper(this); // 2. Khởi tạo
         // 1. Nhận dữ liệu từ màn hình trước
         mPlaylist = (Playlist) getIntent().getSerializableExtra("object_playlist");
 
@@ -86,6 +90,11 @@ public class PlaylistDetailActivity extends AppCompatActivity {
             public void onAddToPlaylistClick(Song song) {
                 // XỬ LÝ KHI BẤM NÚT CỘNG -> Hiện BottomSheet
                 addToPlaylistHelper.showAddToPlaylistDialog(song);
+            }
+            @Override
+            public void onFavoriteClick(Song song, ImageView btnFavorite, List<Long> ids) {
+                // 👇 GỌI HELPER VỚI DANH SÁCH ID
+                favoriteHelper.toggleFavorite(song, btnFavorite, ids);
             }
         });
         rvSongs.setAdapter(songAdapter);
