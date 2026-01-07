@@ -143,7 +143,12 @@ public class MenuActivity extends AppCompatActivity {
         });
 
         menuFavourites.setOnClickListener(v -> {
-            Toast.makeText(this, "Favourites đang phát triển", Toast.LENGTH_SHORT).show();
+            // Chuyển về MainActivity và gửi kèm tín hiệu mở Fragment Favorite
+            Intent intent = new Intent(MenuActivity.this, MainActivity.class);
+            intent.putExtra("open_fragment", "favorite"); // Key để MainActivity bắt
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intent);
+            finish();
         });
 
         menuDownloads.setOnClickListener(v -> {
@@ -156,7 +161,12 @@ public class MenuActivity extends AppCompatActivity {
         });
 
         menuPlaylist.setOnClickListener(v -> {
-            Toast.makeText(this, "Playlist đang phát triển", Toast.LENGTH_SHORT).show();
+            // Chuyển về MainActivity và gửi kèm tín hiệu mở Fragment Playlist
+            Intent intent = new Intent(MenuActivity.this, MainActivity.class);
+            intent.putExtra("open_fragment", "playlist"); // Key để MainActivity bắt
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intent);
+            finish();
         });
 
         menuLogout.setOnClickListener(v -> showLogoutDialog());
@@ -179,7 +189,15 @@ public class MenuActivity extends AppCompatActivity {
         Log.d(TAG, "✅ Đã logout");
         Toast.makeText(this, "Đã đăng xuất", Toast.LENGTH_SHORT).show();
 
-        navigateToLogin();
+        navigateToHome();
+    }
+    // Hàm chuyển về MainActivity (Home)
+    private void navigateToHome() {
+        Intent intent = new Intent(MenuActivity.this, MainActivity.class);
+        // Xóa Stack để không back lại được Menu, coi như reset app về trang chủ
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
     private void navigateToLogin() {

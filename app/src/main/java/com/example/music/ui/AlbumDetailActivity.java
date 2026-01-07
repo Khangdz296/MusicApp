@@ -25,9 +25,8 @@ public class AlbumDetailActivity extends AppCompatActivity {
     private AddToPlaylistHelper addToPlaylistHelper;
     private FavoriteHelper favoriteHelper;
     private MiniPlayerManager miniPlayerManager;
-    private Long currentUserId = 1L;
     private List<Long> likedSongIds = new ArrayList<>();
-
+    private AlbumSongAdapter adapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,7 +71,7 @@ public class AlbumDetailActivity extends AppCompatActivity {
 
             List<Song> finalSongs = songs;
 
-            AlbumSongAdapter adapter = new AlbumSongAdapter(songs, new AlbumSongAdapter.OnItemClickListener() {
+            adapter = new AlbumSongAdapter(songs, new AlbumSongAdapter.OnItemClickListener() {
                 @Override
                 public void onItemClick(Song song) {
                     // 👇 SỬ DỤNG MINI PLAYER thay vì mở PlayMusicActivity
@@ -94,5 +93,15 @@ public class AlbumDetailActivity extends AppCompatActivity {
             rvSongs.setLayoutManager(new LinearLayoutManager(this));
             rvSongs.setAdapter(adapter);
         }
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        favoriteHelper.getLikedSongIds(ids -> {
+            this.likedSongIds = ids;
+            if (adapter != null) { // ✅ Bây giờ nó sẽ hiểu adapter là gì
+                adapter.setLikedSongIds(ids);
+            }
+        });
     }
 }

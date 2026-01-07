@@ -48,7 +48,8 @@ public class SearchFragment extends Fragment {
     private AddToPlaylistHelper addToPlaylistHelper;
     private FavoriteHelper favoriteHelper; // 1. Khai báo
     private List<Song> searchResultList = new ArrayList<>();
-    private List<Long> myLikedIds = new ArrayList<>();
+
+    private List<Long> likedSongIds = new ArrayList<>();
 
     @Nullable
     @Override
@@ -211,5 +212,20 @@ public class SearchFragment extends Fragment {
             }
         }
         return 0;
+    }
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // 👇 GỌI 1 DÒNG LÀ XONG (Helper lo hết)
+        favoriteHelper.getLikedSongIds(ids -> {
+            // Cập nhật list ID vào biến cục bộ
+            this.likedSongIds = ids;
+
+            // Cập nhật Adapter
+            if (songAdapter != null) {
+                songAdapter.setLikedSongIds(ids);
+            }
+        });
     }
 }
