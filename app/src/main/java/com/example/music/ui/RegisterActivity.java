@@ -56,6 +56,12 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
+        // ✅ CHỈ THÊM PHẦN NÀY
+        if (password.length() < 6) {
+            Toast.makeText(this, "Mật khẩu phải có ít nhất 6 ký tự", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         String username = name;
         User user = new User(username, email, name, password);
 
@@ -80,7 +86,6 @@ public class RegisterActivity extends AppCompatActivity {
                         Toast.makeText(RegisterActivity.this,
                                 "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
 
-                        // Chuyển sang VerifyOtpActivity
                         Intent i = new Intent(RegisterActivity.this, VerifyOtpActivity.class);
                         i.putExtra("username", username);
                         i.putExtra("otp_test", res.getTest_otp());
@@ -139,4 +144,5 @@ public class RegisterActivity extends AppCompatActivity {
             }
         });
     }
+
 }

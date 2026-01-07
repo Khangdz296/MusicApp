@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -30,30 +31,35 @@ public class PlayMusicActivity extends AppCompatActivity {
     private MiniPlayerManager miniPlayerManager;
     private Handler handler = new Handler();
     private boolean isUpdatingSeekBar = false;
+    private boolean isDurationSet = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_screen_huy);
 
-        // Lấy instance của Mini Player Manager
         miniPlayerManager = MiniPlayerManager.getInstance();
         // 3. Khởi tạo Helper
         addToPlaylistHelper = new AddToPlaylistHelper(this);
         initViews();
 
-        // Kiểm tra xem có dữ liệu từ Intent không
+        // Kiểm tra xem có phải là request phát bài MỚI không
         Intent intent = getIntent();
-        if (intent.hasExtra("song_data")) {
-            // Có dữ liệu mới -> Phát bài mới
+        boolean isNewSongRequest = intent.getBooleanExtra("play_new_song", false);
+
+        if (isNewSongRequest && intent.hasExtra("song_data")) {
+            // CHỈ phát bài mới khi có flag "play_new_song" = true
             Song song = (Song) intent.getSerializableExtra("song_data");
             List<Song> songList = (ArrayList<Song>) intent.getSerializableExtra("song_list");
             int position = intent.getIntExtra("current_position", 0);
 
             miniPlayerManager.playSong(song, songList, position);
+            Log.d(TAG, "Playing new song from Intent");
+        } else {
+            // Chỉ đồng bộ UI với trạng thái hiện tại, KHÔNG phát lại
+            Log.d(TAG, "Opening full player - syncing UI only");
         }
 
-        // Đồng bộ UI với trạng thái hiện tại
         syncUIWithMiniPlayer();
         setupListeners();
         updateSeekBar();
@@ -110,16 +116,38 @@ public class PlayMusicActivity extends AppCompatActivity {
         // Cập nhật nút Repeat
         updateRepeatButton();
 
-        // Cập nhật SeekBar
+        // Reset flag khi sync UI mới
+        isDurationSet = false;
+
+        // Thử set duration ngay lập tức
+        trySetDuration();
+    }
+
+    private void trySetDuration() {
         MediaPlayer mp = miniPlayerManager.getMediaPlayer();
         if (mp != null) {
             try {
-                seekBar.setMax(mp.getDuration());
-                txtDuration.setText(formatTime(mp.getDuration()));
-            } catch (Exception e) {
+                int duration = mp.getDuration();
+                // Kiểm tra duration hợp lệ (> 0)
+                if (duration > 0) {
+                    seekBar.setMax(duration);
+                    txtDuration.setText(formatTime(duration));
+                    isDurationSet = true;
+                    Log.d(TAG, "Duration set successfully: " + duration);
+                } else {
+                    Log.d(TAG, "Invalid duration: " + duration);
+                    // Set giá trị mặc định tạm thời
+                    seekBar.setMax(100);
+                    txtDuration.setText("--:--");
+                }
+            } catch (IllegalStateException e) {
+                Log.e(TAG, "MediaPlayer not ready: " + e.getMessage());
                 seekBar.setMax(100);
-                txtDuration.setText("0:00");
+                txtDuration.setText("--:--");
             }
+        } else {
+            seekBar.setMax(100);
+            txtDuration.setText("--:--");
         }
     }
 
@@ -137,6 +165,10 @@ public class PlayMusicActivity extends AppCompatActivity {
             }
         });
         btnPlay.setOnClickListener(v -> {
+            if (miniPlayerManager.isPreparing()) {
+                return;
+            }
+
             if (miniPlayerManager.isPlaying()) {
                 miniPlayerManager.pauseMusic();
             } else {
@@ -146,22 +178,30 @@ public class PlayMusicActivity extends AppCompatActivity {
         });
 
         btnNext.setOnClickListener(v -> {
+            if (miniPlayerManager.isPreparing()) {
+                return;
+            }
+
             miniPlayerManager.playNext();
+            isDurationSet = false;
             syncUIWithMiniPlayer();
         });
 
         btnPrevious.setOnClickListener(v -> {
+            if (miniPlayerManager.isPreparing()) {
+                return;
+            }
+
             miniPlayerManager.playPrevious();
+            isDurationSet = false;
             syncUIWithMiniPlayer();
         });
 
-        // Shuffle button
         btnShuffle.setOnClickListener(v -> {
             miniPlayerManager.toggleShuffle();
             updateShuffleButton();
         });
 
-        // Repeat button
         btnRepeat.setOnClickListener(v -> {
             miniPlayerManager.toggleRepeat();
             updateRepeatButton();
@@ -173,8 +213,12 @@ public class PlayMusicActivity extends AppCompatActivity {
                 if (fromUser) {
                     MediaPlayer mp = miniPlayerManager.getMediaPlayer();
                     if (mp != null) {
-                        mp.seekTo(progress);
-                        txtCurrent.setText(formatTime(progress));
+                        try {
+                            mp.seekTo(progress);
+                            txtCurrent.setText(formatTime(progress));
+                        } catch (IllegalStateException e) {
+                            Log.e(TAG, "Error seeking: " + e.getMessage());
+                        }
                     }
                 }
             }
@@ -193,10 +237,8 @@ public class PlayMusicActivity extends AppCompatActivity {
 
     private void updateShuffleButton() {
         if (miniPlayerManager.isShuffleEnabled()) {
-            // Shuffle ON - màu xanh lá
             btnShuffle.setColorFilter(getResources().getColor(R.color.spotify_green));
         } else {
-            // Shuffle OFF - màu trắng
             btnShuffle.setColorFilter(getResources().getColor(android.R.color.white));
         }
     }
@@ -206,18 +248,14 @@ public class PlayMusicActivity extends AppCompatActivity {
 
         switch (repeatMode) {
             case MiniPlayerManager.REPEAT_OFF:
-                // OFF - màu trắng
                 btnRepeat.setImageResource(R.drawable.repeat);
                 btnRepeat.setColorFilter(getResources().getColor(android.R.color.white));
                 break;
             case MiniPlayerManager.REPEAT_ALL:
-                // ALL - màu xanh lá
                 btnRepeat.setImageResource(R.drawable.repeat);
                 btnRepeat.setColorFilter(getResources().getColor(R.color.spotify_green));
                 break;
             case MiniPlayerManager.REPEAT_ONE:
-                // ONE - màu xanh lá, icon khác (nếu có)
-                // Nếu bạn có icon repeat_one, thay đổi ở đây
                 btnRepeat.setImageResource(R.drawable.repeat);
                 btnRepeat.setColorFilter(getResources().getColor(R.color.spotify_green));
                 break;
@@ -225,16 +263,35 @@ public class PlayMusicActivity extends AppCompatActivity {
     }
 
     private void updateSeekBar() {
-        if (!isUpdatingSeekBar) {
-            MediaPlayer mp = miniPlayerManager.getMediaPlayer();
-            if (mp != null && miniPlayerManager.isPlaying()) {
-                try {
+        MediaPlayer mp = miniPlayerManager.getMediaPlayer();
+
+        // Nếu chưa set duration và MediaPlayer đã sẵn sàng, thử set lại
+        if (!isDurationSet && mp != null) {
+            trySetDuration();
+        }
+
+        if (!isUpdatingSeekBar && mp != null) {
+            try {
+                // Kiểm tra MediaPlayer đang trong trạng thái hợp lệ
+                if (miniPlayerManager.isPlaying() || mp.getCurrentPosition() > 0) {
                     int currentPosition = mp.getCurrentPosition();
-                    seekBar.setProgress(currentPosition);
-                    txtCurrent.setText(formatTime(currentPosition));
-                } catch (Exception e) {
-                    // MediaPlayer chưa sẵn sàng
+                    int duration = mp.getDuration();
+
+                    // Cập nhật SeekBar
+                    if (duration > 0) {
+                        seekBar.setProgress(currentPosition);
+                        txtCurrent.setText(formatTime(currentPosition));
+
+                        // Set duration nếu chưa set hoặc bị sai
+                        if (!isDurationSet || seekBar.getMax() != duration) {
+                            seekBar.setMax(duration);
+                            txtDuration.setText(formatTime(duration));
+                            isDurationSet = true;
+                        }
+                    }
                 }
+            } catch (IllegalStateException e) {
+                Log.e(TAG, "Error updating seekbar: " + e.getMessage());
             }
         }
 
@@ -242,10 +299,12 @@ public class PlayMusicActivity extends AppCompatActivity {
         btnPlay.setImageResource(miniPlayerManager.isPlaying() ?
                 R.drawable.ic_pause : R.drawable.ic_play);
 
-        handler.postDelayed(() -> updateSeekBar(), 100);
+        handler.postDelayed(this::updateSeekBar, 100);
     }
 
     private String formatTime(int millis) {
+        if (millis < 0) return "0:00";
+
         int seconds = (millis / 1000) % 60;
         int minutes = (millis / (1000 * 60)) % 60;
         return String.format("%d:%02d", minutes, seconds);
@@ -255,12 +314,18 @@ public class PlayMusicActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         handler.removeCallbacksAndMessages(null);
-        // KHÔNG release MediaPlayer vì mini player vẫn cần nó
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        isDurationSet = false;
         syncUIWithMiniPlayer();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        handler.removeCallbacksAndMessages(null);
     }
 }
