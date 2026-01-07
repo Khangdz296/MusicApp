@@ -1,9 +1,13 @@
 package com.example.music.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -12,57 +16,109 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.music.adapter.FavoriteSongAdapter;
-import com.example.music.model.Artist; // 👇 THÊM IMPORT ARTIST
-import com.example.music.model.Category;
+import com.example.music.adapter.SongAdapterK;
+import com.example.music.api.ApiService;
+import com.example.music.api.RetrofitClient;
 import com.example.music.model.Song;
+import com.example.music.ui.AddToPlaylistHelper;
+import com.example.music.utils.MiniPlayerManager;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class FavoriteSongsFragment extends Fragment {
+
+    private RecyclerView recyclerView;
+    private SongAdapterK adapter;
+    private AddToPlaylistHelper addToPlaylistHelper;
+    private FavoriteHelper favoriteHelper; // 1. Khai báo
+    private List<Song> listSong = new ArrayList<>();
+    private TextView tvEmptyNotify; // Thêm text thông báo nếu rỗng
+
+    // Giả lập User ID (Sau này lấy từ SharedPreferences khi login xong)
+    private Long currentUserId = 1L;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        RecyclerView recyclerView = new RecyclerView(getContext());
+        // Bạn có thể cần thêm TextView id tvEmptyNotify vào layout fragment nếu muốn hiển thị "Chưa có bài hát nào"
+        // Ở đây tui tạo Recycler view bằng code như bạn làm, nhưng tốt nhất nên có file XML layout.
+
+        recyclerView = new RecyclerView(getContext());
         recyclerView.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
         recyclerView.setBackgroundColor(0xFF121212);
-
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // --- 2. TẠO DỮ LIỆU GIẢ (MOCK DATA) ---
-        List<Song> list = new ArrayList<>();
+        addToPlaylistHelper = new AddToPlaylistHelper(getContext());
+        favoriteHelper = new FavoriteHelper(getContext()); // 2. Khởi tạo
 
-        // Tạo Category giả
-        Category catPop = new Category(1L, "V-Pop", "");
+        // Setup Adapter rỗng trước
+        adapter = new SongAdapterK(getContext(), listSong, new SongAdapterK.OnSongClickListener() {
+            @Override
+            public void onSongClick(Song song) {
+                int position = listSong.indexOf(song);
+                MiniPlayerManager.getInstance().playSong(song, listSong, position);
 
-        // 👇 TẠO OBJECT ARTIST GIẢ (Vì Constructor Song cần Artist object)
-        Artist artistSonTung = new Artist(1L, "Sơn Tùng M-TP", "https://example.com/st.jpg", "Mô tả Sơn Tùng");
-        Artist artistHoangDung = new Artist(2L, "Hoàng Dũng", "https://example.com/hd.jpg", "Mô tả Hoàng Dũng");
-        Artist artistMono = new Artist(3L, "MONO", "https://example.com/mono.jpg", "Mô tả MONO");
+                Intent intent = new Intent(getContext(), PlayMusicActivity.class);
+                intent.putExtra("song_data", song);
+                intent.putExtra("song_list", new ArrayList<>(listSong));
+                intent.putExtra("current_position", position);
+                startActivity(intent);
+            }
 
-        // 👇 CẬP NHẬT TRUYỀN ARTIST OBJECT VÀO CONSTRUCTOR SONG
-        // new Song(id, title, artistObj, img, file, duration, isFavorite, category, views)
+            @Override
+            public void onAddToPlaylistClick(Song song) {
+                addToPlaylistHelper.showAddToPlaylistDialog(song);
+            }
+            @Override
+            public void onFavoriteClick(Song song, ImageView btnFavorite, List<Long> ids) {
+                // 👇 GỌI HELPER VỚI DANH SÁCH ID
+                favoriteHelper.toggleFavorite(song, btnFavorite, ids);
+            }
 
-        list.add(new Song(1L, "Muộn Rồi Mà Sao Còn", artistSonTung,
-                "https://i.scdn.co/image/ab6761610000e5ebc53f7c462377b7f1e7373f52", "", 300, true, catPop, 1500000));
-
-        list.add(new Song(2L, "Nàng Thơ", artistHoangDung,
-                "https://i.scdn.co/image/ab6761610000e5ebc6b73df78cb0ce400d43dfc6", "", 300, true, catPop, 850000));
-
-        list.add(new Song(3L, "Waiting For You", artistMono,
-                "https://i.scdn.co/image/ab6761610000e5eb54e7d44869c43d2cc95e54c8", "", 280, true, catPop, 2000000));
-
-        // 3. KHỞI TẠO ADAPTER
-        FavoriteSongAdapter adapter = new FavoriteSongAdapter(getContext(), list, song -> {
-            Toast.makeText(getContext(), "Phát bài: " + song.getTitle(), Toast.LENGTH_SHORT).show();
         });
-
         recyclerView.setAdapter(adapter);
 
+        // GỌI API LẤY DỮ LIỆU THẬT
+        fetchFavoriteSongs();
+
         return recyclerView;
+    }
+
+    // Load lại danh sách khi quay lại màn hình (đề phòng user bỏ like ở màn hình player)
+    @Override
+    public void onResume() {
+        super.onResume();
+        fetchFavoriteSongs();
+    }
+
+    private void fetchFavoriteSongs() {
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+
+        apiService.getFavoriteSongs(currentUserId).enqueue(new Callback<List<Song>>() {
+            @Override
+            public void onResponse(Call<List<Song>> call, Response<List<Song>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    listSong = response.body();
+                    adapter.updateData(listSong);
+
+                    Log.d("FAV_API", "Lấy được " + listSong.size() + " bài yêu thích.");
+                } else {
+                    Log.e("FAV_API", "Lỗi lấy dữ liệu: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Song>> call, Throwable t) {
+                Log.e("FAV_API", "Lỗi kết nối: " + t.getMessage());
+                // Toast.makeText(getContext(), "Lỗi tải bài hát yêu thích", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

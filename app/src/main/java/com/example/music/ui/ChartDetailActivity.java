@@ -20,6 +20,8 @@ import com.example.music.api.RetrofitClient;
 import com.example.music.model.Album;
 import com.example.music.model.Song;
 import com.example.music.utils.RecentSongManager;
+import com.example.music.ui.AddToPlaylistHelper;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,11 +38,19 @@ public class ChartDetailActivity extends AppCompatActivity {
     private ImageView btnBack;
     private ApiService apiService;
     private String chartType; // "SONGS" hoặc "ALBUMS"
+    private FavoriteHelper favoriteHelper; // 1. Khai báo Helper
+    private AddToPlaylistHelper addToPlaylistHelper;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chart_detail);
+        // 2. Khởi tạo Helper (truyền Context vào)
+        addToPlaylistHelper = new AddToPlaylistHelper(this);
+        favoriteHelper = new FavoriteHelper(this); // 2. Khởi tạo
+
 
         // Ẩn ActionBar mặc định
         if (getSupportActionBar() != null) getSupportActionBar().hide();
@@ -108,8 +118,12 @@ public class ChartDetailActivity extends AppCompatActivity {
                         }
                         @Override
                         public void onAddToPlaylistClick(Song song) {
-                            // TODO: Implement adding song to playlist
-                            Toast.makeText(ChartDetailActivity.this, "Thêm " + song.getTitle() + " vào playlist", Toast.LENGTH_SHORT).show();
+                            // 3. GỌI HELPER ĐỂ HIỆN BOTTOM SHEET
+                            addToPlaylistHelper.showAddToPlaylistDialog(song);
+                        }
+                        @Override
+                        public void onFavoriteClick(Song song, ImageView btnFavorite, List<Long> likedIds) {
+                            favoriteHelper.toggleFavorite(song, btnFavorite, likedIds);
                         }
 //                    AlbumSongAdapter songAdapter = new AlbumSongAdapter(songs, song -> {
 //                        Intent intent = new Intent(ChartDetailActivity.this, PlayMusicActivity.class);
