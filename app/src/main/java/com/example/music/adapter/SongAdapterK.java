@@ -23,6 +23,7 @@ public class SongAdapterK extends RecyclerView.Adapter<SongAdapterK.SongViewHold
 
     public interface OnSongClickListener {
         void onSongClick(Song song);
+        void onAddToPlaylistClick(Song song);
     }
 
     public SongAdapterK(Context context, List<Song> list, OnSongClickListener listener) {
@@ -66,6 +67,12 @@ public class SongAdapterK extends RecyclerView.Adapter<SongAdapterK.SongViewHold
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onSongClick(song);
+            }
+        });
+        holder.btnAddToPlaylist.setOnClickListener(v -> {
+            if (listener != null) {
+                // Khi bấm dấu cộng -> Gọi hàm này để Activity xử lý (hiện BottomSheet)
+                listener.onAddToPlaylistClick(song);
             }
         });
     }

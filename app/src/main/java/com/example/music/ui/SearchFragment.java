@@ -35,7 +35,7 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
+import com.example.music.ui.AddToPlaylistHelper;
 public class SearchFragment extends Fragment {
 
     private RecyclerView rcvCategories, rcvSearchResults;
@@ -44,7 +44,7 @@ public class SearchFragment extends Fragment {
     private CategoryAdapterK categoryAdapter;
     private SongAdapterK songAdapter;
     private MiniPlayerManager miniPlayerManager;
-
+    private AddToPlaylistHelper addToPlaylistHelper;
     // Lưu danh sách kết quả tìm kiếm
     private List<Song> searchResultList = new ArrayList<>();
 
@@ -55,7 +55,8 @@ public class SearchFragment extends Fragment {
 
         // Khởi tạo MiniPlayerManager
         miniPlayerManager = MiniPlayerManager.getInstance();
-
+        // 2. Khởi tạo Helper (truyền Context vào)
+        addToPlaylistHelper = new AddToPlaylistHelper(getContext());
         // 1. Ánh xạ View
         rcvCategories = view.findViewById(R.id.rcvCategories);
         rcvSearchResults = view.findViewById(R.id.rcvSearchResults);
@@ -100,6 +101,12 @@ public class SearchFragment extends Fragment {
                 intent.putExtra("song_list", new ArrayList<>(searchResultList));
                 intent.putExtra("current_position", position);
                 startActivity(intent);
+            }
+
+            @Override
+            public void onAddToPlaylistClick(Song song) {
+                // 3. GỌI HELPER ĐỂ HIỆN BOTTOM SHEET
+                addToPlaylistHelper.showAddToPlaylistDialog(song);
             }
         });
         rcvSearchResults.setAdapter(songAdapter);

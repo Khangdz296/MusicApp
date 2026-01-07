@@ -97,12 +97,26 @@ public class ChartDetailActivity extends AppCompatActivity {
             public void onResponse(Call<List<Song>> call, Response<List<Song>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Song> songs = response.body();
-                    AlbumSongAdapter songAdapter = new AlbumSongAdapter(songs, song -> {
-                        Intent intent = new Intent(ChartDetailActivity.this, PlayMusicActivity.class);
-                        intent.putExtra("song_data", song);
-                        intent.putExtra("song_list", new ArrayList<>(songs));
-                        startActivity(intent);
-                        RecentSongManager.saveSong(ChartDetailActivity.this, song);
+                    AlbumSongAdapter songAdapter = new AlbumSongAdapter(songs, new AlbumSongAdapter.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(Song song) {
+                            Intent intent = new Intent(ChartDetailActivity.this, PlayMusicActivity.class);
+                            intent.putExtra("song_data", song);
+                            intent.putExtra("song_list", new ArrayList<>(songs));
+                            startActivity(intent);
+                            RecentSongManager.saveSong(ChartDetailActivity.this, song);
+                        }
+                        @Override
+                        public void onAddToPlaylistClick(Song song) {
+                            // TODO: Implement adding song to playlist
+                            Toast.makeText(ChartDetailActivity.this, "Thêm " + song.getTitle() + " vào playlist", Toast.LENGTH_SHORT).show();
+                        }
+//                    AlbumSongAdapter songAdapter = new AlbumSongAdapter(songs, song -> {
+//                        Intent intent = new Intent(ChartDetailActivity.this, PlayMusicActivity.class);
+//                        intent.putExtra("song_data", song);
+//                        intent.putExtra("song_list", new ArrayList<>(songs));
+//                        startActivity(intent);
+//                        RecentSongManager.saveSong(ChartDetailActivity.this, song);
                     });
                     rvChartSongs.setAdapter(songAdapter);
                 }
